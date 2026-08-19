@@ -1,0 +1,5 @@
+C:\Users\brad.nelson\OneDrive - Catholic Education Tasmania\Desktop\QuoteGenerator\QuoteGenerator.exe
+C:\Users\brad.nelson\OneDrive - Catholic Education Tasmania\Desktop\QuoteGenerator\QuoteGenerator.dll
+C:\Users\brad.nelson\OneDrive - Catholic Education Tasmania\Desktop\QuoteGenerator\QuoteGenerator.deps.json
+C:\Users\brad.nelson\OneDrive - Catholic Education Tasmania\Desktop\QuoteGenerator\QuoteGenerator.runtimeconfig.json
+C:\Users\brad.nelson\OneDrive - Catholic Education Tasmania\Desktop\QuoteGenerator\QuoteGenerator.pdb
