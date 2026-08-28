@@ -1,0 +1,70 @@
+<Window x:Class="BerryGoodUtils.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Berry Good Utils" Height="860" Width="1100"
+        WindowStartupLocation="CenterScreen"
+        Loaded="Window_Loaded"
+        Background="#f0f4f8">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <TextBlock Text="🫐" FontSize="32" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="Berry Good Utils" FontSize="26" FontWeight="Bold" Foreground="#1e293b"/>
+                    <TextBlock Text="Official Software Utilities of the Berry Good Pools Company" FontSize="13" Foreground="#64748b"/>
+                </StackPanel>
+            </StackPanel>
+
+            <Button Grid.Column="1" x:Name="btnBack" Content="&#x2190; Back to Dashboard" Style="{StaticResource BackButton}"
+                    Visibility="Collapsed" Click="Back_Click" VerticalAlignment="Center"/>
+        </Grid>
+
+        <!-- Module Title Bar (shown when a module is active) -->
+        <Border Grid.Row="1" x:Name="moduleTitleBar" Background="{StaticResource BerryBlueBrush}" CornerRadius="6,6,0,0"
+                Padding="16,10" Visibility="Collapsed" Margin="0,0,0,0">
+            <TextBlock x:Name="tbModuleTitle" Text="Module" FontSize="18" FontWeight="SemiBold" Foreground="White"/>
+        </Border>
+
+        <!-- Content Area -->
+        <Border Grid.Row="2" Background="White" CornerRadius="8" Padding="20" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+            <Grid>
+                <!-- Dashboard -->
+                <ScrollViewer x:Name="dashboardPanel" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Dashboard" FontSize="18" FontWeight="SemiBold" Foreground="#334155" VerticalAlignment="Center"/>
+                            <Button Grid.Column="1" Content="Open Customer Folders" Style="{StaticResource SecondaryButton}"
+                                    Click="OpenCustomerFolders_Click"/>
+                        </Grid>
+                        <UniformGrid x:Name="modulesGrid" Columns="3" HorizontalAlignment="Stretch">
+                            <!-- Tiles generated in code-behind -->
+                        </UniformGrid>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Module Host -->
+                <ContentControl x:Name="moduleHost" Visibility="Collapsed"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
