@@ -1,0 +1,6 @@
+**/bin/
+**/obj/
+.vs/
+*.user
+gmail-oauth-client.json
+**/GmailTokens/

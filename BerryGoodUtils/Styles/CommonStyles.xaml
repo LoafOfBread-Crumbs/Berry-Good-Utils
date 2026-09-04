@@ -2,8 +2,8 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- Brand colors -->
-    <Color x:Key="BerryBlueColor">#2563eb</Color>
-    <Color x:Key="BerryBlueDarkColor">#1d4ed8</Color>
+    <Color x:Key="BerryBlueColor">#1FA6C8</Color>
+    <Color x:Key="BerryBlueDarkColor">#17819B</Color>
     <Color x:Key="BerryRedColor">#ef4444</Color>
     <Color x:Key="BerryRedDarkColor">#dc2626</Color>
     <Color x:Key="SurfaceColor">#f0f4f8</Color>

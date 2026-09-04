@@ -2,7 +2,9 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using BerryGoodUtils.Core.Email;
 using BerryGoodUtils.Models;
+using BerryGoodUtils.Modules.Email;
 using BerryGoodUtils.Modules.QuoteGenerator;
 using BerryGoodUtils.Services;
 
@@ -15,12 +17,14 @@ public partial class PartRequestModule : UserControl, IUtilityModule
     public string Icon => "📦";
     public UserControl View => this;
 
+    private readonly IEmailSender _emailSender;
     private AppData _appData;
     private ObservableCollection<PartRequestItem> _requestItems = new();
     private Supplier? _selectedSupplier;
 
-    public PartRequestModule()
+    public PartRequestModule(IEmailSender emailSender)
     {
+        _emailSender = emailSender;
         InitializeComponent();
         _appData = DataService.LoadAppData();
         dgItems.ItemsSource = _requestItems;
@@ -125,50 +129,60 @@ public partial class PartRequestModule : UserControl, IUtilityModule
         }
     }
 
-    private void GenerateRequest_Click(object sender, RoutedEventArgs e)
+    private void SaveHtml_Click(object sender, RoutedEventArgs e)
     {
-        if (_selectedSupplier == null)
-        {
-            MessageBox.Show("Please select or create a supplier first.", "Missing Info", MessageBoxButton.OK, MessageBoxImage.Warning);
+        SaveRequest(true);
+    }
+
+    private void SaveText_Click(object sender, RoutedEventArgs e)
+    {
+        SaveRequest(false);
+    }
+
+    private void EmailRequest_Click(object sender, RoutedEventArgs e)
+    {
+        if (!ValidateRequest())
             return;
-        }
 
-        if (_requestItems.Count == 0)
-        {
-            MessageBox.Show("Please add at least one item to the request.", "No Items", MessageBoxButton.OK, MessageBoxImage.Warning);
-            return;
-        }
+        var message = EmailMessageFactory.ForPartRequest(_selectedSupplier!, _requestItems, _appData.Company);
+        new EmailPreviewWindow(message, _emailSender, _appData,
+            () => EmailMessageFactory.ForPartRequest(_selectedSupplier!, _requestItems, _appData.Company))
+        { Owner = Window.GetWindow(this) }.ShowDialog();
+    }
 
-        var ownerWindow = Window.GetWindow(this);
-        var outputWindow = new PartRequestOutputWindow
-        {
-            Owner = ownerWindow
-        };
-
-        if (outputWindow.ShowDialog() != true)
+    private void SaveRequest(bool generateHtml)
+    {
+        if (!ValidateRequest())
             return;
 
         try
         {
-            string filePath;
-            if (outputWindow.GenerateHtml)
-            {
-                filePath = PartRequestExportService.SaveHtml(_selectedSupplier, _requestItems, _appData.Company);
-            }
-            else
-            {
-                filePath = PartRequestExportService.SaveText(_selectedSupplier, _requestItems, _appData.Company);
-            }
-
+            var filePath = generateHtml
+                ? PartRequestExportService.SaveHtml(_selectedSupplier!, _requestItems, _appData.Company)
+                : PartRequestExportService.SaveText(_selectedSupplier!, _requestItems, _appData.Company);
             MessageBox.Show($"Request saved!\n\nFile: {filePath}\n\nOpening for review/copy-paste...",
                 "Request Generated", MessageBoxButton.OK, MessageBoxImage.Information);
-
             Process.Start(new ProcessStartInfo(filePath) { UseShellExecute = true });
         }
         catch (Exception ex)
         {
             MessageBox.Show($"Error generating request: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
+    }
+
+    private bool ValidateRequest()
+    {
+        if (_selectedSupplier == null)
+        {
+            MessageBox.Show("Please select or create a supplier first.", "Missing Info", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return false;
+        }
+        if (_requestItems.Count == 0)
+        {
+            MessageBox.Show("Please add at least one item to the request.", "No Items", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return false;
+        }
+        return true;
     }
 
     private void CompanySettings_Click(object sender, RoutedEventArgs e)

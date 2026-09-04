@@ -157,10 +157,11 @@
 
         <!-- Bottom Actions -->
         <Border Grid.Row="2" Margin="0,10,0,0">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="Clear Quote" Style="{StaticResource SecondaryButton}" Click="ClearQuote_Click" Margin="0,0,8,0"/>
-                <Button Content="Save &amp; Preview Quote" Style="{StaticResource ActionButton}" Click="GenerateQuote_Click"/>
-            </StackPanel>
+            <WrapPanel HorizontalAlignment="Right">
+                <Button Content="Clear Quote" Style="{StaticResource SecondaryButton}" Click="ClearQuote_Click" Margin="0,0,8,8"/>
+                <Button x:Name="btnEmailQuote" Content="Email Saved Quote" Style="{StaticResource SecondaryButton}" Click="EmailQuote_Click" IsEnabled="False" Margin="0,0,8,8"/>
+                <Button Content="Save &amp; Preview Quote" Style="{StaticResource ActionButton}" Click="GenerateQuote_Click" Margin="0,0,0,8"/>
+            </WrapPanel>
         </Border>
     </Grid>
 </UserControl>

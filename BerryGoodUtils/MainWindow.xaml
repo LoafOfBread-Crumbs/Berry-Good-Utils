@@ -24,7 +24,11 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0" Orientation="Horizontal">
-                <TextBlock Text="🫐" FontSize="32" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                <Border Width="64" Height="64" Margin="0,0,14,0" VerticalAlignment="Center" CornerRadius="32" ClipToBounds="True">
+                    <Border.Background>
+                        <ImageBrush ImageSource="/Assets/berrygoodpools-logo.png" Stretch="UniformToFill"/>
+                    </Border.Background>
+                </Border>
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock Text="Berry Good Utils" FontSize="26" FontWeight="Bold" Foreground="#1e293b"/>
                     <TextBlock Text="Official Software Utilities of the Berry Good Pools Company" FontSize="13" Foreground="#64748b"/>

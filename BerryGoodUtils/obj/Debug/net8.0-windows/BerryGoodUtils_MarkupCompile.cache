@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET8_0;NETCOREAPP
 C:\Users\Bread\Music\JoshProject\JoshProject\BerryGoodUtils\App.xaml
-92117451829
-
-26-318270318
-1981266802334
-MainWindow.xaml;Modules\PartRequest\PartRequestModule.xaml;Modules\PartRequest\PartRequestOutputWindow.xaml;Modules\PartRequest\SupplierEditWindow.xaml;Modules\QuoteGenerator\CompanySettingsWindow.xaml;Modules\QuoteGenerator\CustomerEditWindow.xaml;Modules\QuoteGenerator\QuoteDestinationWindow.xaml;Modules\QuoteGenerator\QuoteGeneratorModule.xaml;Styles\CommonStyles.xaml;
+101773895403
+3-41391197
+211003832164
+2101684378307
+MainWindow.xaml;Modules\Email\EmailPreviewWindow.xaml;Modules\PartRequest\PartRequestModule.xaml;Modules\PartRequest\PartRequestOutputWindow.xaml;Modules\PartRequest\SupplierEditWindow.xaml;Modules\QuoteGenerator\CompanySettingsWindow.xaml;Modules\QuoteGenerator\CustomerEditWindow.xaml;Modules\QuoteGenerator\QuoteDestinationWindow.xaml;Modules\QuoteGenerator\QuoteGeneratorModule.xaml;Styles\CommonStyles.xaml;
 
 False
 

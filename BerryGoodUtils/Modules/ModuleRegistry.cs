@@ -1,5 +1,6 @@
 using BerryGoodUtils.Modules.PartRequest;
 using BerryGoodUtils.Modules.QuoteGenerator;
+using BerryGoodUtils.Services.Email;
 
 namespace BerryGoodUtils.Modules;
 
@@ -13,9 +14,11 @@ namespace BerryGoodUtils.Modules;
 /// </summary>
 public static class ModuleRegistry
 {
+    private static readonly GmailEmailSender EmailSender = new();
+
     public static IReadOnlyList<IUtilityModule> Modules { get; } = new List<IUtilityModule>
     {
-        new QuoteGeneratorModule(),
-        new PartRequestModule()
+        new QuoteGeneratorModule(EmailSender),
+        new PartRequestModule(EmailSender)
     };
 }

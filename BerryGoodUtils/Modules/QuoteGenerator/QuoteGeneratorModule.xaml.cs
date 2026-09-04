@@ -2,7 +2,9 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using BerryGoodUtils.Core.Email;
 using BerryGoodUtils.Models;
+using BerryGoodUtils.Modules.Email;
 using BerryGoodUtils.Services;
 
 namespace BerryGoodUtils.Modules.QuoteGenerator;
@@ -14,12 +16,15 @@ public partial class QuoteGeneratorModule : UserControl, IUtilityModule
     public string Icon => "📝";
     public UserControl View => this;
 
+    private readonly IEmailSender _emailSender;
     private AppData _appData;
     private ObservableCollection<QuoteItem> _quoteItems = new();
     private Customer? _selectedCustomer;
+    private Quote? _lastGeneratedQuote;
 
-    public QuoteGeneratorModule()
+    public QuoteGeneratorModule(IEmailSender emailSender)
     {
+        _emailSender = emailSender;
         InitializeComponent();
         _appData = DataService.LoadAppData();
         dgItems.ItemsSource = _quoteItems;
@@ -168,6 +173,8 @@ public partial class QuoteGeneratorModule : UserControl, IUtilityModule
         {
             txtNotes.Text = string.Empty;
             _quoteItems.Clear();
+            _lastGeneratedQuote = null;
+            btnEmailQuote.IsEnabled = false;
             UpdateTotal();
 
             cmbPartService.Text = string.Empty;
@@ -245,11 +252,24 @@ public partial class QuoteGeneratorModule : UserControl, IUtilityModule
                 "Quote Generated", MessageBoxButton.OK, MessageBoxImage.Information);
 
             Process.Start(new ProcessStartInfo(filePath) { UseShellExecute = true });
+            _lastGeneratedQuote = quote;
+            btnEmailQuote.IsEnabled = true;
         }
         catch (Exception ex)
         {
             MessageBox.Show($"Error generating quote: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
+    }
+
+    private void EmailQuote_Click(object sender, RoutedEventArgs e)
+    {
+        if (_lastGeneratedQuote == null)
+            return;
+
+        var message = EmailMessageFactory.ForQuote(_lastGeneratedQuote, _appData.Company);
+        new EmailPreviewWindow(message, _emailSender, _appData,
+            () => EmailMessageFactory.ForQuote(_lastGeneratedQuote!, _appData.Company))
+        { Owner = Window.GetWindow(this) }.ShowDialog();
     }
 
     private void CompanySettings_Click(object sender, RoutedEventArgs e)
