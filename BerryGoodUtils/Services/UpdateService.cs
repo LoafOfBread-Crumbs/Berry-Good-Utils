@@ -111,9 +111,12 @@ public static class UpdateService
 
         var tempFolder = Path.GetDirectoryName(downloadedExePath)!;
         var scriptPath = Path.Combine(tempFolder, "apply-update.ps1");
+        var currentProcessId = Environment.ProcessId;
 
         var script = new StringBuilder();
         script.AppendLine("$ErrorActionPreference = 'Stop'");
+        script.AppendLine($"$proc = Get-Process -Id {currentProcessId} -ErrorAction SilentlyContinue");
+        script.AppendLine("if ($null -ne $proc) { $proc.WaitForExit() }");
         script.AppendLine("Start-Sleep -Seconds 2");
         script.AppendLine($"Copy-Item -Path '{EscapePowerShellPath(downloadedExePath)}' -Destination '{EscapePowerShellPath(currentExePath)}' -Force");
         script.AppendLine($"Unblock-File -Path '{EscapePowerShellPath(currentExePath)}'");
