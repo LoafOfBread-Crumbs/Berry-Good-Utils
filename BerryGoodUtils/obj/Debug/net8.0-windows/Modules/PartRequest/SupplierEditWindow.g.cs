@@ -99,7 +99,7 @@ namespace BerryGoodUtils.Modules.PartRequest {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/BerryGoodUtils;component/modules/partrequest/suppliereditwindow.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/BerryGoodUtils;V1.0.0;component/modules/partrequest/suppliereditwindow.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\..\Modules\PartRequest\SupplierEditWindow.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

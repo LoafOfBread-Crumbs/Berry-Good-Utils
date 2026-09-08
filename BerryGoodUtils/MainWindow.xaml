@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Berry Good Utils" Height="860" Width="1100"
+        Title="Berry Good Utils" Height="860" Width="1100" Icon="/TempIcon.png"
         WindowStartupLocation="CenterScreen"
         Loaded="Window_Loaded"
         Background="#f0f4f8">
@@ -26,7 +26,7 @@
             <StackPanel Grid.Column="0" Orientation="Horizontal">
                 <Border Width="64" Height="64" Margin="0,0,14,0" VerticalAlignment="Center" CornerRadius="32" ClipToBounds="True">
                     <Border.Background>
-                        <ImageBrush ImageSource="/Assets/berrygoodpools-logo.png" Stretch="UniformToFill"/>
+                        <ImageBrush ImageSource="/TempIcon.png" Stretch="UniformToFill"/>
                     </Border.Background>
                 </Border>
                 <StackPanel VerticalAlignment="Center">
@@ -49,22 +49,33 @@
         <Border Grid.Row="2" Background="White" CornerRadius="8" Padding="20" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
             <Grid>
                 <!-- Dashboard -->
-                <ScrollViewer x:Name="dashboardPanel" VerticalScrollBarVisibility="Auto">
-                    <StackPanel>
-                        <Grid Margin="0,0,0,16">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Dashboard" FontSize="18" FontWeight="SemiBold" Foreground="#334155" VerticalAlignment="Center"/>
-                            <Button Grid.Column="1" Content="Open Customer Folders" Style="{StaticResource SecondaryButton}"
-                                    Click="OpenCustomerFolders_Click"/>
-                        </Grid>
-                        <UniformGrid x:Name="modulesGrid" Columns="3" HorizontalAlignment="Stretch">
-                            <!-- Tiles generated in code-behind -->
-                        </UniformGrid>
-                    </StackPanel>
-                </ScrollViewer>
+                <Grid x:Name="dashboardPanel">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Dashboard" FontSize="18" FontWeight="SemiBold" Foreground="#334155" VerticalAlignment="Center"/>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <Button Content="Check for Updates" Padding="8,4" Margin="0,0,8,0"
+                                            Style="{StaticResource SecondaryButton}" Click="Update_Click"/>
+                                    <Button Content="Clarkee Mode" Padding="8,4" Margin="0,0,8,0" Opacity="0.62"
+                                            Style="{StaticResource SecondaryButton}" Click="ClarkeeMode_Click"/>
+                                    <Button Content="Open Customer Folders" Style="{StaticResource SecondaryButton}"
+                                            Click="OpenCustomerFolders_Click"/>
+                                </StackPanel>
+                            </Grid>
+                            <UniformGrid x:Name="modulesGrid" Columns="3" HorizontalAlignment="Stretch">
+                                <!-- Tiles generated in code-behind -->
+                            </UniformGrid>
+                        </StackPanel>
+                    </ScrollViewer>
+                    <Image Source="/Assets/ted lasso believe.png" Width="170" MaxHeight="230" Margin="0,0,8,8"
+                           HorizontalAlignment="Right" VerticalAlignment="Bottom" Stretch="Uniform" IsHitTestVisible="False"/>
+                    <Canvas x:Name="clarkeeCanvas" Panel.ZIndex="10"/>
+                </Grid>
 
                 <!-- Module Host -->
                 <ContentControl x:Name="moduleHost" Visibility="Collapsed"/>
