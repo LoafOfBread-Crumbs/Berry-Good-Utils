@@ -3,7 +3,14 @@
   <ItemGroup>
     <Compile Remove="Models\**\*.cs" />
     <ProjectReference Include="..\BerryGoodUtils.Core\BerryGoodUtils.Core.csproj" />
+    <Resource Include="TempIcon.png" />
     <Resource Include="..\berrygoodpools-logo.png" Link="Assets\berrygoodpools-logo.png" />
+    <Resource Include="..\ted lasso believe.png" Link="Assets\ted lasso believe.png" />
+    <Resource Include="..\Clarkees\clarkee.png" Link="Assets\Clarkees\clarkee.png" />
+    <Resource Include="..\Clarkees\clarkee2.png" Link="Assets\Clarkees\clarkee2.png" />
+    <Resource Include="..\Clarkees\clarkee fear me.png" Link="Assets\Clarkees\clarkee fear me.png" />
+    <Resource Include="..\Clarkees\cursed spa clarkee.png" Link="Assets\Clarkees\cursed spa clarkee.png" />
+    <Content Include="..\Clarkees\clarkee-mode-finale.mp4" Link="Assets\Clarkees\clarkee-mode-finale.mp4" CopyToOutputDirectory="PreserveNewest" Condition="Exists('..\Clarkees\clarkee-mode-finale.mp4')" />
   </ItemGroup>
 
   <ItemGroup>
