@@ -48,7 +48,7 @@ public partial class UpdateWindow : Window
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
 
-            Application.Current.Shutdown();
+            Environment.Exit(0);
         }
         catch (Exception ex)
         {
