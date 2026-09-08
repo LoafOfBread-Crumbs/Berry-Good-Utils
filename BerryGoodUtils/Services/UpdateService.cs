@@ -116,6 +116,7 @@ public static class UpdateService
         script.AppendLine("$ErrorActionPreference = 'Stop'");
         script.AppendLine("Start-Sleep -Seconds 2");
         script.AppendLine($"Copy-Item -Path '{EscapePowerShellPath(downloadedExePath)}' -Destination '{EscapePowerShellPath(currentExePath)}' -Force");
+        script.AppendLine($"Unblock-File -Path '{EscapePowerShellPath(currentExePath)}'");
         script.AppendLine($"Start-Process -FilePath '{EscapePowerShellPath(currentExePath)}'");
         script.AppendLine($"Remove-Item -Path '{EscapePowerShellPath(tempFolder)}' -Recurse -Force");
 

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BerryGoodUtils")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+17613bb27b9f462226c414cfe31f3d806ddb6c81")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+88fc95ba566ee9502c78e572a5a9ec35a7d9a1cb")]
 [assembly: System.Reflection.AssemblyProductAttribute("BerryGoodUtils")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BerryGoodUtils")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0")]
