@@ -10,17 +10,32 @@ Windows 11 Smart App Control and SmartScreen may block the updater from replacin
 
 ### Step 1: Create a folder for the app
 
-Create a folder such as:
+Use this per-user application folder:
 
 ```
-C:\Users\<TheirUserName>\BerryGoodUtils
+%LOCALAPPDATA%\BerryGoodUtils
 ```
 
-Replace `<TheirUserName>` with their Windows user name.
+To open it, press **Win + R**, paste `%LOCALAPPDATA%`, and press Enter. Create a folder named `BerryGoodUtils` there.
 
-### Step 2: Download the app
+Do **not** put the app under `C:\Program Files`. Windows normally requires administrator permission to update files there, so the automatic updater may fail or display a UAC prompt. `%LOCALAPPDATA%` is writable by the current user and is the recommended location for this updater.
 
-Download `BerryGoodUtils.exe` and move it into the folder you just created.
+### Step 2: Download and move the app
+
+Download `BerryGoodUtils.exe`, then move it from Downloads into:
+
+```
+%LOCALAPPDATA%\BerryGoodUtils\BerryGoodUtils.exe
+```
+
+Keeping it outside Downloads prevents it from being accidentally deleted and gives the updater a stable location.
+
+### Step 2b: Create shortcuts
+
+1. Right-click `BerryGoodUtils.exe` in `%LOCALAPPDATA%\BerryGoodUtils`.
+2. Select **Show more options** → **Send to** → **Desktop (create shortcut)**.
+3. Rename the shortcut to **Berry Good Utils** if desired.
+4. To pin it, right-click the shortcut and select **Pin to Start** or **Pin to taskbar**.
 
 ### Step 3: Unblock the file
 
@@ -71,14 +86,24 @@ Save the following as `setup-friend.ps1` and run it in an administrator PowerShe
 #Requires -RunAsAdministrator
 $ErrorActionPreference = "Stop"
 
-$folder = Read-Host "Enter the full path where BerryGoodUtils.exe is saved (for example, C:\Users\John\BerryGoodUtils)"
+$source = Join-Path $env:USERPROFILE "Downloads\BerryGoodUtils.exe"
+$folder = Join-Path $env:LOCALAPPDATA "BerryGoodUtils"
 $exe = Join-Path $folder "BerryGoodUtils.exe"
 
-if (-not (Test-Path $exe)) {
-    throw "Could not find BerryGoodUtils.exe at $exe"
+if (-not (Test-Path $source)) {
+    throw "Could not find BerryGoodUtils.exe in the Downloads folder."
 }
 
+New-Item -ItemType Directory -Path $folder -Force | Out-Null
+Copy-Item -Path $source -Destination $exe -Force
 Unblock-File -Path $exe
+
+$shell = New-Object -ComObject WScript.Shell
+$desktop = [Environment]::GetFolderPath("Desktop")
+$shortcut = $shell.CreateShortcut((Join-Path $desktop "Berry Good Utils.lnk"))
+$shortcut.TargetPath = $exe
+$shortcut.WorkingDirectory = $folder
+$shortcut.Save()
 
 # Disable SmartScreen for executables
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" -Name "SmartScreenEnabled" -Value "Off" -Force -ErrorAction SilentlyContinue

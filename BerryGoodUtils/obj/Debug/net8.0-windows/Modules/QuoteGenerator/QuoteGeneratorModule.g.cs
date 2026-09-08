@@ -147,7 +147,7 @@ namespace BerryGoodUtils.Modules.QuoteGenerator {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/BerryGoodUtils;V1.0.0;component/modules/quotegenerator/quotegeneratormodule.xaml" +
+            System.Uri resourceLocater = new System.Uri("/BerryGoodUtils;V1.0.4;component/modules/quotegenerator/quotegeneratormodule.xaml" +
                     "", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\..\Modules\QuoteGenerator\QuoteGeneratorModule.xaml"

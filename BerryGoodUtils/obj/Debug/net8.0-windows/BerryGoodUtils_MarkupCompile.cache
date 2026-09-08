@@ -1,5 +1,5 @@
 ﻿BerryGoodUtils
-1.0.0
+1.0.4
 
 winexe
 C#
@@ -11,7 +11,7 @@ false
 TRACE;DEBUG;NET;NET8_0;NETCOREAPP
 C:\Users\Bread\Music\JoshProject\JoshProject\BerryGoodUtils\App.xaml
 12703659233
-4-428121623
+3-41391197
 25-1506335142
 2101684378307
 ClarkeeMode\ClarkeeVideoWindow.xaml;MainWindow.xaml;Modules\Email\EmailPreviewWindow.xaml;Modules\PartRequest\PartRequestModule.xaml;Modules\PartRequest\PartRequestOutputWindow.xaml;Modules\PartRequest\SupplierEditWindow.xaml;Modules\QuoteGenerator\CompanySettingsWindow.xaml;Modules\QuoteGenerator\CustomerEditWindow.xaml;Modules\QuoteGenerator\QuoteDestinationWindow.xaml;Modules\QuoteGenerator\QuoteGeneratorModule.xaml;Styles\CommonStyles.xaml;UpdateWindow.xaml;

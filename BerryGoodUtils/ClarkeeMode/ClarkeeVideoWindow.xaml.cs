@@ -5,7 +5,7 @@ namespace BerryGoodUtils.ClarkeeMode;
 
 public partial class ClarkeeVideoWindow : Window
 {
-    private readonly string _videoPath = Path.Combine(AppContext.BaseDirectory, "Assets", "Clarkees", "clarkee-mode-finale.mp4");
+    private const string VideoResourcePath = "pack://application:,,,/Assets/Clarkees/clarkee-mode-finale.mp4";
     private bool _isPlaying;
 
     public ClarkeeVideoWindow()
@@ -15,12 +15,36 @@ public partial class ClarkeeVideoWindow : Window
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
-        if (!File.Exists(_videoPath))
-            return;
+        try
+        {
+            var videoPath = ExtractVideo();
+            placeholderDetail.Text = "Loading the finale...";
+            videoPlayer.Source = new Uri(videoPath, UriKind.Absolute);
+            videoPlayer.Play();
+        }
+        catch
+        {
+            placeholderDetail.Text = "The finale video could not be loaded.";
+        }
+    }
 
-        placeholderDetail.Text = "Loading the finale...";
-        videoPlayer.Source = new Uri(_videoPath, UriKind.Absolute);
-        videoPlayer.Play();
+    private static string ExtractVideo()
+    {
+        var resource = Application.GetResourceStream(new Uri(VideoResourcePath));
+        if (resource == null)
+            throw new FileNotFoundException("The finale video is not included in this build.");
+
+        using var resourceStream = resource.Stream;
+        var mediaFolder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "BerryGoodUtils",
+            "Media");
+        var videoPath = Path.Combine(mediaFolder, "clarkee-mode-finale.mp4");
+
+        Directory.CreateDirectory(mediaFolder);
+        using var fileStream = new FileStream(videoPath, FileMode.Create, FileAccess.Write, FileShare.Read);
+        resourceStream.CopyTo(fileStream);
+        return videoPath;
     }
 
     private void VideoPlayer_MediaOpened(object sender, RoutedEventArgs e)

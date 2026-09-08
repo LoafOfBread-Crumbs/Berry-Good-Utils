@@ -10,7 +10,7 @@
     <Resource Include="..\Clarkees\clarkee2.png" Link="Assets\Clarkees\clarkee2.png" />
     <Resource Include="..\Clarkees\clarkee fear me.png" Link="Assets\Clarkees\clarkee fear me.png" />
     <Resource Include="..\Clarkees\cursed spa clarkee.png" Link="Assets\Clarkees\cursed spa clarkee.png" />
-    <Content Include="..\Clarkees\clarkee-mode-finale.mp4" Link="Assets\Clarkees\clarkee-mode-finale.mp4" CopyToOutputDirectory="PreserveNewest" Condition="Exists('..\Clarkees\clarkee-mode-finale.mp4')" />
+    <Resource Include="..\Clarkees\clarkee-mode-finale.mp4" Link="Assets\Clarkees\clarkee-mode-finale.mp4" Condition="Exists('..\Clarkees\clarkee-mode-finale.mp4')" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,9 +28,9 @@
     <UseWPF>true</UseWPF>
     <RootNamespace>BerryGoodUtils</RootNamespace>
     <AssemblyName>BerryGoodUtils</AssemblyName>
-    <Version>1.0.4</Version>
-    <AssemblyVersion>1.0.4</AssemblyVersion>
-    <FileVersion>1.0.4</FileVersion>
+    <Version>1.0.5</Version>
+    <AssemblyVersion>1.0.5</AssemblyVersion>
+    <FileVersion>1.0.5</FileVersion>
   </PropertyGroup>
 
 </Project>

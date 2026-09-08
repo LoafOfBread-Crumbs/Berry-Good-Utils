@@ -6,7 +6,7 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v8.0": {
-      "BerryGoodUtils/1.0.0": {
+      "BerryGoodUtils/1.0.4": {
         "dependencies": {
           "BerryGoodUtils.Core": "1.0.0",
           "Google.Apis.Gmail.v1": "1.70.0.3833",
@@ -194,7 +194,7 @@
     }
   },
   "libraries": {
-    "BerryGoodUtils/1.0.0": {
+    "BerryGoodUtils/1.0.4": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

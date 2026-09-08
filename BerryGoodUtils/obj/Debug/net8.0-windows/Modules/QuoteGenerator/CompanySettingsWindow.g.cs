@@ -83,7 +83,7 @@ namespace BerryGoodUtils.Modules.QuoteGenerator {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/BerryGoodUtils;V1.0.0;component/modules/quotegenerator/companysettingswindow.xam" +
+            System.Uri resourceLocater = new System.Uri("/BerryGoodUtils;V1.0.4;component/modules/quotegenerator/companysettingswindow.xam" +
                     "l", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\..\Modules\QuoteGenerator\CompanySettingsWindow.xaml"

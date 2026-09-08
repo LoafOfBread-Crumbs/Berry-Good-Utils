@@ -64,6 +64,5 @@ C:\Users\Bread\Music\JoshProject\JoshProject\BerryGoodUtils\bin\Debug\net8.0-win
 C:\Users\Bread\Music\JoshProject\JoshProject\BerryGoodUtils\obj\Debug\net8.0-windows\BerryGoodUtils_Content.g.cs
 C:\Users\Bread\Music\JoshProject\JoshProject\BerryGoodUtils\obj\Debug\net8.0-windows\ClarkeeMode\ClarkeeVideoWindow.baml
 C:\Users\Bread\Music\JoshProject\JoshProject\BerryGoodUtils\obj\Debug\net8.0-windows\ClarkeeMode\ClarkeeVideoWindow.g.cs
-C:\Users\Bread\Music\JoshProject\JoshProject\BerryGoodUtils\bin\Debug\net8.0-windows\Assets\Clarkees\clarkee-mode-finale.mp4
 C:\Users\Bread\Music\JoshProject\JoshProject\BerryGoodUtils\obj\Debug\net8.0-windows\UpdateWindow.baml
 C:\Users\Bread\Music\JoshProject\JoshProject\BerryGoodUtils\obj\Debug\net8.0-windows\UpdateWindow.g.cs
