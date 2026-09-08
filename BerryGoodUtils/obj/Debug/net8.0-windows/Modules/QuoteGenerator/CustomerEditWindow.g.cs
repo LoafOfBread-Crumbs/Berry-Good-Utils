@@ -91,7 +91,7 @@ namespace BerryGoodUtils.Modules.QuoteGenerator {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/BerryGoodUtils;component/modules/quotegenerator/customereditwindow.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/BerryGoodUtils;V1.0.0;component/modules/quotegenerator/customereditwindow.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\..\Modules\QuoteGenerator\CustomerEditWindow.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

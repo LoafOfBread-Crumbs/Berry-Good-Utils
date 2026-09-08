@@ -72,3 +72,23 @@ For a production release, complete the OAuth consent and verification requiremen
 ## Mobile Migration
 
 `BerryGoodUtils.Core` is UI- and platform-neutral and can be referenced by a future .NET MAUI iOS/Android application. Mobile apps must use platform-specific iOS and Android OAuth client IDs and redirect URI handling; do not reuse the Desktop OAuth client as the final mobile configuration. Implement `IEmailSender` and secure token storage with iOS Keychain, Android Keystore, or MAUI `SecureStorage`, while reusing the Core models, document composers, validation, and email message factories.
+
+## Releasing an Update
+
+The app can check for and install updates from GitHub Releases.
+
+1. Update the version in `BerryGoodUtils/BerryGoodUtils.csproj`:
+   ```xml
+   <Version>1.0.1</Version>
+   <AssemblyVersion>1.0.1</AssemblyVersion>
+   <FileVersion>1.0.1</FileVersion>
+   ```
+2. Publish a self-contained EXE:
+   ```powershell
+   dotnet publish BerryGoodUtils/BerryGoodUtils.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
+   ```
+3. Create a GitHub Release with a tag matching the version, e.g. `v1.0.1`.
+4. Attach the published EXE (`BerryGoodUtils.exe`) to the release. The updater looks for an asset with that exact name.
+5. Deployed builds can click **Check for Updates** on the dashboard header; if a newer release tag is found, the app downloads the EXE and restarts with the new version.
+
+The replacement happens from a temporary PowerShell helper script after the current process exits. If the app is installed under a protected folder such as `Program Files`, the helper will need elevation to overwrite the EXE. For first-time deployments, installing to a user-writable location (for example, a folder under `%LOCALAPPDATA%`) avoids this issue.
