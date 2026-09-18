@@ -1,12 +1,15 @@
 using System.Text;
+using BerryGoodUtils.Core.Email;
 using BerryGoodUtils.Models;
 
 namespace BerryGoodUtils.Core.Documents;
 
 public static class PartRequestDocumentComposer
 {
-    public static string GenerateHtml(Supplier supplier, IEnumerable<PartRequestItem> items, CompanyInfo company)
+    public static string GenerateHtml(Supplier supplier, IEnumerable<PartRequestItem> items, CompanyInfo company, IEnumerable<EmailAttachment>? attachments = null, IEnumerable<SavedPart>? savedParts = null)
     {
+        var partLookup = savedParts?.ToDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase) ?? [];
+        var attachmentList = attachments?.ToList() ?? [];
         var sb = new StringBuilder();
         sb.AppendLine("<!DOCTYPE html>");
         sb.AppendLine("<html><head><meta charset='utf-8'/>");
@@ -21,6 +24,10 @@ public static class PartRequestDocumentComposer
         sb.AppendLine("td { padding: 9px 12px; border-bottom: 1px solid #e5e7eb; font-size: 14px; }");
         sb.AppendLine("tr:nth-child(even) { background: #f8fafc; }");
         sb.AppendLine(".footer { margin-top: 40px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #ddd; padding-top: 15px; }");
+        sb.AppendLine(".attachment-gallery { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; }");
+        sb.AppendLine(".attachment-item { width: 220px; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; background: #fff; }");
+        sb.AppendLine(".attachment-item img { max-width: 100%; height: auto; border-radius: 4px; display: block; }");
+        sb.AppendLine(".attachment-caption { font-size: 12px; color: #666; margin-top: 6px; word-break: break-all; }");
         sb.AppendLine("</style></head><body>");
         sb.AppendLine("<div class='header'>");
         sb.AppendLine($"<div class='company-name'>{Escape(company.CompanyName)}</div>");
@@ -40,17 +47,40 @@ public static class PartRequestDocumentComposer
         sb.AppendLine("<div class='section'>");
         sb.AppendLine("<div class='section-title'>Parts / Services Requested</div>");
         sb.AppendLine("<p>Please provide pricing and availability for the following items:</p>");
-        sb.AppendLine("<table><tr><th>Part / Service</th><th>Qty Needed</th></tr>");
-        foreach (var item in items) sb.AppendLine($"<tr><td>{Escape(item.PartOrService)}</td><td>{item.Quantity}</td></tr>");
+        sb.AppendLine("<table><tr><th>Part / Service</th><th>Qty Needed</th><th>Details</th></tr>");
+        foreach (var item in items)
+        {
+            var details = PartDetailFormatter.FormatHtml(partLookup.GetValueOrDefault(item.PartOrService));
+            sb.AppendLine($"<tr><td>{Escape(item.PartOrService)}</td><td>{item.Quantity}</td><td>{details}</td></tr>");
+        }
         sb.AppendLine("</table>");
         sb.AppendLine("</div>");
+
+        if (attachmentList.Count > 0)
+        {
+            sb.AppendLine("<div class='section'>");
+            sb.AppendLine("<div class='section-title'>Attachments</div>");
+            sb.AppendLine("<div class='attachment-gallery'>");
+            foreach (var attachment in attachmentList)
+            {
+                sb.AppendLine("<div class='attachment-item'>");
+                sb.AppendLine($"<img src=\"cid:{attachment.ContentId}\" alt=\"{Escape(attachment.FileName)}\"/>");
+                sb.AppendLine($"<div class='attachment-caption'>{Escape(attachment.FileName)}</div>");
+                sb.AppendLine("</div>");
+            }
+            sb.AppendLine("</div>");
+            sb.AppendLine("</div>");
+        }
+
         sb.AppendLine("<div class='footer'>Thank you for your time.</div>");
         sb.AppendLine("</body></html>");
         return sb.ToString();
     }
 
-    public static string GenerateText(Supplier supplier, IEnumerable<PartRequestItem> items, CompanyInfo company)
+    public static string GenerateText(Supplier supplier, IEnumerable<PartRequestItem> items, CompanyInfo company, IEnumerable<EmailAttachment>? attachments = null, IEnumerable<SavedPart>? savedParts = null)
     {
+        var partLookup = savedParts?.ToDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase) ?? [];
+        var attachmentList = attachments?.ToList() ?? [];
         var sb = new StringBuilder();
         sb.AppendLine(company.CompanyName);
         if (!string.IsNullOrWhiteSpace(company.Address)) sb.AppendLine(company.Address);
@@ -65,10 +95,22 @@ public static class PartRequestDocumentComposer
         sb.AppendLine();
         sb.AppendLine("Please provide pricing and availability for the following items:");
         sb.AppendLine();
-        sb.AppendLine($"{"Part / Service",-40} {"Qty Needed",10}");
-        sb.AppendLine(new string('-', 52));
-        foreach (var item in items) sb.AppendLine($"{item.PartOrService,-40} {item.Quantity,10}");
+        sb.AppendLine($"{"Part / Service",-40} {"Qty Needed",10} Details");
+        sb.AppendLine(new string('-', 60));
+        foreach (var item in items)
+        {
+            var details = PartDetailFormatter.FormatText(partLookup.GetValueOrDefault(item.PartOrService));
+            sb.AppendLine($"{item.PartOrService,-40} {item.Quantity,10}");
+            if (!string.IsNullOrWhiteSpace(details))
+                sb.AppendLine(details);
+        }
         sb.AppendLine();
+        if (attachmentList.Count > 0)
+        {
+            sb.AppendLine("Attachments:");
+            foreach (var attachment in attachmentList) sb.AppendLine($"  - {attachment.FileName}");
+            sb.AppendLine();
+        }
         sb.AppendLine("Thank you for your time.");
         return sb.ToString();
     }
@@ -79,8 +121,10 @@ public static class PartRequestDocumentComposer
 
 public static class QuoteDocumentComposer
 {
-    public static string GenerateHtml(Quote quote, CompanyInfo company)
+    public static string GenerateHtml(Quote quote, CompanyInfo company, IEnumerable<EmailAttachment>? attachments = null, IEnumerable<SavedPart>? savedParts = null)
     {
+        var partLookup = savedParts?.ToDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase) ?? [];
+        var attachmentList = attachments?.ToList() ?? [];
         var sb = new StringBuilder();
         sb.AppendLine("<!DOCTYPE html>");
         sb.AppendLine("<html><head><meta charset='utf-8'/>");
@@ -104,6 +148,10 @@ public static class QuoteDocumentComposer
         sb.AppendLine(".totals .amount { font-weight: bold; color: #1FA6C8; font-size: 22px; }");
         sb.AppendLine(".notes { background: #f8fafc; border-left: 4px solid #1FA6C8; padding: 12px 16px; margin-top: 25px; font-size: 14px; }");
         sb.AppendLine(".footer { margin-top: 40px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #ddd; padding-top: 15px; }");
+        sb.AppendLine(".attachment-gallery { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; }");
+        sb.AppendLine(".attachment-item { width: 220px; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; background: #fff; }");
+        sb.AppendLine(".attachment-item img { max-width: 100%; height: auto; border-radius: 4px; display: block; }");
+        sb.AppendLine(".attachment-caption { font-size: 12px; color: #666; margin-top: 6px; word-break: break-all; }");
         sb.AppendLine("@media print { body { margin: 20px; } }");
         sb.AppendLine("</style></head><body>");
         sb.AppendLine("<div class='header'><div>");
@@ -125,10 +173,32 @@ public static class QuoteDocumentComposer
         if (!string.IsNullOrWhiteSpace(quote.CustomerEmail)) sb.AppendLine($"Email: {Escape(quote.CustomerEmail)}");
         sb.AppendLine("</div><table>");
         sb.AppendLine("<tr><th>Part / Service</th><th>Description</th><th>Qty</th><th>Unit Price</th><th style='text-align:right'>Total</th></tr>");
-        foreach (var item in quote.Items) sb.AppendLine($"<tr><td>{Escape(item.PartOrService)}</td><td>{Escape(item.Description)}</td><td style='text-align:center'>{item.Quantity}</td><td>${item.UnitPrice:N2}</td><td style='text-align:right'>${item.Total:N2}</td></tr>");
+        foreach (var item in quote.Items)
+        {
+            var details = PartDetailFormatter.FormatHtml(partLookup.GetValueOrDefault(item.PartOrService));
+            var descriptionHtml = Escape(item.Description).Replace("\n", "<br/>");
+            if (!string.IsNullOrWhiteSpace(details))
+                descriptionHtml += $"<br/><br/>{details}";
+            sb.AppendLine($"<tr><td>{Escape(item.PartOrService)}</td><td>{descriptionHtml}</td><td style='text-align:center'>{item.Quantity}</td><td>${item.UnitPrice:N2}</td><td style='text-align:right'>${item.Total:N2}</td></tr>");
+        }
         sb.AppendLine("</table>");
         sb.AppendLine($"<div class='totals'><span class='label'>Total: </span><span class='amount'>${quote.Subtotal:N2}</span></div>");
         if (!string.IsNullOrWhiteSpace(quote.Notes)) sb.AppendLine($"<div class='notes'><strong>Notes:</strong><br/>{Escape(quote.Notes).Replace("\n", "<br/>")}</div>");
+        if (attachmentList.Count > 0)
+        {
+            sb.AppendLine("<div class='section'>");
+            sb.AppendLine("<div class='section-title'>Attachments</div>");
+            sb.AppendLine("<div class='attachment-gallery'>");
+            foreach (var attachment in attachmentList)
+            {
+                sb.AppendLine("<div class='attachment-item'>");
+                sb.AppendLine($"<img src=\"cid:{attachment.ContentId}\" alt=\"{Escape(attachment.FileName)}\"/>");
+                sb.AppendLine($"<div class='attachment-caption'>{Escape(attachment.FileName)}</div>");
+                sb.AppendLine("</div>");
+            }
+            sb.AppendLine("</div>");
+            sb.AppendLine("</div>");
+        }
         sb.AppendLine("<div class='footer'>Thank you for your business!</div>");
         sb.AppendLine("</body></html>");
         return sb.ToString();

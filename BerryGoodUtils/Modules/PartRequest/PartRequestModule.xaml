@@ -56,16 +56,23 @@
                             <ColumnDefinition Width="100"/>
                             <ColumnDefinition Width="12"/>
                             <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="Part / Service" Style="{StaticResource FieldLabel}"/>
-                            <ComboBox x:Name="cmbPartService" IsEditable="True" FontSize="13" Padding="4"/>
+                            <ComboBox x:Name="cmbPartService" IsEditable="True" FontSize="13" Padding="4"
+                                      SelectionChanged="CmbPartService_SelectionChanged"/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
                             <TextBlock Text="Qty Needed" Style="{StaticResource FieldLabel}"/>
                             <TextBox x:Name="txtQuantity" Style="{StaticResource InputBox}" Text="1"/>
                         </StackPanel>
-                        <Button Grid.Column="4" Content="Add Item" Style="{StaticResource ActionButton}"
+                        <StackPanel Grid.Column="4" VerticalAlignment="Bottom" Margin="0,0,8,0">
+                            <CheckBox x:Name="chkAttachReferenceImage" Content="Attach reference image" IsEnabled="False"
+                                      FontSize="12" Foreground="{StaticResource TextMutedBrush}" VerticalContentAlignment="Center"/>
+                        </StackPanel>
+                        <Button Grid.Column="6" Content="Add Item" Style="{StaticResource ActionButton}"
                                 VerticalAlignment="Bottom" Click="AddItem_Click" Margin="0,0,0,1"/>
                     </Grid>
 
@@ -90,6 +97,43 @@
                             </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
+
+                    <Separator Margin="0,16,0,12" Background="{StaticResource BorderBrush}"/>
+
+                    <!-- Image Attachments -->
+                    <TextBlock Text="Image Attachments" Style="{StaticResource HeaderText}"/>
+                    <Border x:Name="dropZone" BorderBrush="{StaticResource BorderBrush}" BorderThickness="2"
+                            CornerRadius="6" Padding="16" Background="#f8fafc" Margin="0,0,0,8"
+                            AllowDrop="True" DragOver="DropZone_DragOver" Drop="DropZone_Drop" DragLeave="DropZone_DragLeave">
+                        <Grid>
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="Drag and drop images here" HorizontalAlignment="Center"
+                                           Foreground="{StaticResource TextMutedBrush}" FontSize="13"/>
+                                <TextBlock Text="or" HorizontalAlignment="Center"
+                                           Foreground="{StaticResource TextMutedBrush}" FontSize="13" Margin="0,4"/>
+                                <Button Content="Click to Attach Images" Style="{StaticResource SecondaryButton}"
+                                        Click="AttachImages_Click" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <ListBox x:Name="lbAttachments" MaxHeight="120" BorderBrush="{StaticResource BorderBrush}"
+                             BorderThickness="1" Background="White" FontSize="13">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding FileName}" VerticalAlignment="Center"
+                                               ToolTip="{Binding FilePath}" TextTrimming="CharacterEllipsis"/>
+                                    <Button Grid.Column="1" Content="Remove" Style="{StaticResource DangerButton}"
+                                            Click="RemoveAttachment_Click" Tag="{Binding}" Margin="8,0,0,0"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                 </StackPanel>
             </ScrollViewer>
         </Border>

@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using BerryGoodUtils.Core.Email;
@@ -7,6 +8,7 @@ using BerryGoodUtils.Models;
 using BerryGoodUtils.Modules.Email;
 using BerryGoodUtils.Modules.QuoteGenerator;
 using BerryGoodUtils.Services;
+using Microsoft.Win32;
 
 namespace BerryGoodUtils.Modules.PartRequest;
 
@@ -20,6 +22,7 @@ public partial class PartRequestModule : UserControl, IUtilityModule
     private readonly IEmailSender _emailSender;
     private AppData _appData;
     private ObservableCollection<PartRequestItem> _requestItems = new();
+    private ObservableCollection<EmailAttachment> _attachments = new();
     private Supplier? _selectedSupplier;
 
     public PartRequestModule(IEmailSender emailSender)
@@ -28,7 +31,15 @@ public partial class PartRequestModule : UserControl, IUtilityModule
         InitializeComponent();
         _appData = DataService.LoadAppData();
         dgItems.ItemsSource = _requestItems;
+        lbAttachments.ItemsSource = _attachments;
         RefreshSupplierDropdown();
+        RefreshPartsDropdown();
+        Loaded += (_, _) => RefreshData();
+    }
+
+    private void RefreshData()
+    {
+        _appData = DataService.LoadAppData();
         RefreshPartsDropdown();
     }
 
@@ -70,6 +81,24 @@ public partial class PartRequestModule : UserControl, IUtilityModule
         }
     }
 
+    private void CmbPartService_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (cmbPartService.SelectedItem is string selectedName)
+        {
+            var part = _appData.SavedParts.FirstOrDefault(p => p.Name == selectedName);
+            if (part != null)
+            {
+                chkAttachReferenceImage.IsEnabled = part.HasReferenceImage;
+                chkAttachReferenceImage.IsChecked = part.HasReferenceImage;
+            }
+        }
+        else
+        {
+            chkAttachReferenceImage.IsEnabled = false;
+            chkAttachReferenceImage.IsChecked = false;
+        }
+    }
+
     private void AddItem_Click(object sender, RoutedEventArgs e)
     {
         var partName = cmbPartService.Text?.Trim();
@@ -88,7 +117,8 @@ public partial class PartRequestModule : UserControl, IUtilityModule
         _requestItems.Add(new PartRequestItem
         {
             PartOrService = partName,
-            Quantity = qty
+            Quantity = qty,
+            IncludeReferenceImage = chkAttachReferenceImage.IsChecked == true
         });
 
         if (!_appData.SavedParts.Any(p => p.Name.Equals(partName, StringComparison.OrdinalIgnoreCase)))
@@ -106,6 +136,8 @@ public partial class PartRequestModule : UserControl, IUtilityModule
         cmbPartService.Text = string.Empty;
         cmbPartService.SelectedIndex = -1;
         txtQuantity.Text = "1";
+        chkAttachReferenceImage.IsChecked = false;
+        chkAttachReferenceImage.IsEnabled = false;
     }
 
     private void RemoveItem_Click(object sender, RoutedEventArgs e)
@@ -116,16 +148,112 @@ public partial class PartRequestModule : UserControl, IUtilityModule
         }
     }
 
+    private void AttachImages_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new OpenFileDialog
+        {
+            Title = "Attach Images",
+            Filter = "Image files|*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.webp|All files|*.*",
+            Multiselect = true
+        };
+
+        if (dialog.ShowDialog(Window.GetWindow(this)) != true)
+            return;
+
+        foreach (var filePath in dialog.FileNames)
+            TryAddImageAttachment(filePath);
+    }
+
+    private void DropZone_DragOver(object sender, DragEventArgs e)
+    {
+        if (e.Data.GetDataPresent(DataFormats.FileDrop) && e.Data.GetData(DataFormats.FileDrop) is string[] files && files.Any(IsImageFile))
+        {
+            e.Effects = DragDropEffects.Copy;
+            dropZone.Background = (System.Windows.Media.Brush)FindResource("SurfaceBrush");
+        }
+        else
+        {
+            e.Effects = DragDropEffects.None;
+        }
+        e.Handled = true;
+    }
+
+    private void DropZone_DragLeave(object sender, DragEventArgs e)
+    {
+        dropZone.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFrom("#f8fafc")!;
+        e.Handled = true;
+    }
+
+    private void DropZone_Drop(object sender, DragEventArgs e)
+    {
+        dropZone.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFrom("#f8fafc")!;
+        if (!e.Data.GetDataPresent(DataFormats.FileDrop))
+            return;
+
+        var files = e.Data.GetData(DataFormats.FileDrop) as string[] ?? [];
+        foreach (var filePath in files)
+            TryAddImageAttachment(filePath);
+        e.Handled = true;
+    }
+
+    private void TryAddImageAttachment(string filePath)
+    {
+        if (!IsImageFile(filePath))
+        {
+            MessageBox.Show($"'{Path.GetFileName(filePath)}' is not a supported image file.", "Invalid Attachment",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        if (_attachments.Any(a => a.FilePath.Equals(filePath, StringComparison.OrdinalIgnoreCase)))
+            return;
+
+        _attachments.Add(new EmailAttachment
+        {
+            FileName = Path.GetFileName(filePath),
+            FilePath = filePath,
+            ContentType = GetImageMimeType(filePath)
+        });
+    }
+
+    private static bool IsImageFile(string filePath)
+    {
+        var extension = Path.GetExtension(filePath).ToLowerInvariant();
+        return extension is ".png" or ".jpg" or ".jpeg" or ".gif" or ".bmp" or ".webp";
+    }
+
+    private static string GetImageMimeType(string filePath)
+    {
+        return Path.GetExtension(filePath).ToLowerInvariant() switch
+        {
+            ".png" => "image/png",
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".gif" => "image/gif",
+            ".bmp" => "image/bmp",
+            ".webp" => "image/webp",
+            _ => "application/octet-stream"
+        };
+    }
+
+    private void RemoveAttachment_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.Tag is EmailAttachment attachment)
+            _attachments.Remove(attachment);
+    }
+
     private void ClearRequest_Click(object sender, RoutedEventArgs e)
     {
-        var result = MessageBox.Show("Clear all requested items?", "Confirm Clear",
+        var result = MessageBox.Show("Clear all requested items and attachments?", "Confirm Clear",
             MessageBoxButton.YesNo, MessageBoxImage.Question);
         if (result == MessageBoxResult.Yes)
         {
             _requestItems.Clear();
+            _attachments.Clear();
             cmbPartService.Text = string.Empty;
             cmbPartService.SelectedIndex = -1;
             txtQuantity.Text = "1";
+            chkAttachReferenceImage.IsChecked = false;
+            chkAttachReferenceImage.IsEnabled = false;
         }
     }
 
@@ -144,10 +272,35 @@ public partial class PartRequestModule : UserControl, IUtilityModule
         if (!ValidateRequest())
             return;
 
-        var message = EmailMessageFactory.ForPartRequest(_selectedSupplier!, _requestItems, _appData.Company);
+        var allAttachments = GetAllAttachments();
+        var message = EmailMessageFactory.ForPartRequest(_selectedSupplier!, _requestItems, _appData.Company, allAttachments, _appData.SavedParts);
         new EmailPreviewWindow(message, _emailSender, _appData,
-            () => EmailMessageFactory.ForPartRequest(_selectedSupplier!, _requestItems, _appData.Company))
+            () => EmailMessageFactory.ForPartRequest(_selectedSupplier!, _requestItems, _appData.Company, GetAllAttachments(), _appData.SavedParts))
         { Owner = Window.GetWindow(this) }.ShowDialog();
+    }
+
+    private List<EmailAttachment> GetAllAttachments()
+    {
+        var allAttachments = new List<EmailAttachment>(_attachments);
+        foreach (var item in _requestItems.Where(i => i.IncludeReferenceImage))
+        {
+            var part = _appData.SavedParts.FirstOrDefault(p => p.Name.Equals(item.PartOrService, StringComparison.OrdinalIgnoreCase));
+            if (part?.HasReferenceImage != true)
+                continue;
+
+            var path = part.ReferenceImagePath;
+            if (allAttachments.Any(a => a.FilePath.Equals(path, StringComparison.OrdinalIgnoreCase)))
+                continue;
+
+            allAttachments.Add(new EmailAttachment
+            {
+                FileName = Path.GetFileName(path),
+                FilePath = path,
+                ContentType = GetImageMimeType(path)
+            });
+        }
+
+        return allAttachments;
     }
 
     private void SaveRequest(bool generateHtml)

@@ -1,3 +1,4 @@
+using BerryGoodUtils.Modules.InventoryManager;
 using BerryGoodUtils.Modules.PartRequest;
 using BerryGoodUtils.Modules.QuoteGenerator;
 using BerryGoodUtils.Services.Email;
@@ -19,6 +20,7 @@ public static class ModuleRegistry
     public static IReadOnlyList<IUtilityModule> Modules { get; } = new List<IUtilityModule>
     {
         new QuoteGeneratorModule(EmailSender),
-        new PartRequestModule(EmailSender)
+        new PartRequestModule(EmailSender),
+        new InventoryManagerModule()
     };
 }

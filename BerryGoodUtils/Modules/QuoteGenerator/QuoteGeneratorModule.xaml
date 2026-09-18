@@ -90,6 +90,8 @@
                             <ColumnDefinition Width="100"/>
                             <ColumnDefinition Width="8"/>
                             <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="8"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0">
@@ -109,7 +111,11 @@
                             <TextBlock Text="Unit Price ($)" Style="{StaticResource FieldLabel}"/>
                             <TextBox x:Name="txtUnitPrice" Style="{StaticResource InputBox}" Text="0.00"/>
                         </StackPanel>
-                        <Button Grid.Column="8" Content="Add Item" Style="{StaticResource ActionButton}"
+                        <StackPanel Grid.Column="8" Margin="8,0,8,0" VerticalAlignment="Bottom">
+                            <CheckBox x:Name="chkAttachReferenceImage" Content="Attach reference image" IsEnabled="False"
+                                      FontSize="12" Foreground="{StaticResource TextMutedBrush}" VerticalContentAlignment="Center"/>
+                        </StackPanel>
+                        <Button Grid.Column="10" Content="Add Item" Style="{StaticResource ActionButton}"
                                 VerticalAlignment="Bottom" Click="AddItem_Click" Margin="0,0,0,1"/>
                     </Grid>
 

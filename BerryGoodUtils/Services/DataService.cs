@@ -12,6 +12,7 @@ public static class DataService
 
     private static readonly string DataFile = Path.Combine(DataFolder, "appdata.json");
     private static readonly string QuotesFolder = Path.Combine(DataFolder, "Quotes");
+    private static readonly string PartImagesFolder = Path.Combine(DataFolder, "PartImages");
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -62,5 +63,12 @@ public static class DataService
         if (!Directory.Exists(QuotesFolder))
             Directory.CreateDirectory(QuotesFolder);
         return QuotesFolder;
+    }
+
+    public static string GetPartImagesFolder()
+    {
+        if (!Directory.Exists(PartImagesFolder))
+            Directory.CreateDirectory(PartImagesFolder);
+        return PartImagesFolder;
     }
 }

@@ -66,3 +66,12 @@ C:\Users\Bread\Music\JoshProject\JoshProject\BerryGoodUtils\obj\Debug\net8.0-win
 C:\Users\Bread\Music\JoshProject\JoshProject\BerryGoodUtils\obj\Debug\net8.0-windows\ClarkeeMode\ClarkeeVideoWindow.g.cs
 C:\Users\Bread\Music\JoshProject\JoshProject\BerryGoodUtils\obj\Debug\net8.0-windows\UpdateWindow.baml
 C:\Users\Bread\Music\JoshProject\JoshProject\BerryGoodUtils\obj\Debug\net8.0-windows\UpdateWindow.g.cs
+C:\Users\Bread\Music\JoshProject\JoshProject\BerryGoodUtils\obj\Debug\net8.0-windows\Modules\InventoryManager\InventoryManagerModule.baml
+C:\Users\Bread\Music\JoshProject\JoshProject\BerryGoodUtils\obj\Debug\net8.0-windows\Modules\InventoryManager\InventoryManagerModule.g.cs
+C:\Users\Bread\Music\JoshProject\JoshProject\BerryGoodUtils\obj\Debug\net8.0-windows\Modules\InventoryManager\PartFromImageWindow.baml
+C:\Users\Bread\Music\JoshProject\JoshProject\BerryGoodUtils\obj\Debug\net8.0-windows\Modules\InventoryManager\PartFromImageWindow.g.cs
+C:\Users\Bread\Music\JoshProject\JoshProject\BerryGoodUtils\bin\Debug\net8.0-windows\x86\leptonica-1.82.0.dll
+C:\Users\Bread\Music\JoshProject\JoshProject\BerryGoodUtils\bin\Debug\net8.0-windows\x86\tesseract50.dll
+C:\Users\Bread\Music\JoshProject\JoshProject\BerryGoodUtils\bin\Debug\net8.0-windows\x64\leptonica-1.82.0.dll
+C:\Users\Bread\Music\JoshProject\JoshProject\BerryGoodUtils\bin\Debug\net8.0-windows\x64\tesseract50.dll
+C:\Users\Bread\Music\JoshProject\JoshProject\BerryGoodUtils\bin\Debug\net8.0-windows\Tesseract.dll

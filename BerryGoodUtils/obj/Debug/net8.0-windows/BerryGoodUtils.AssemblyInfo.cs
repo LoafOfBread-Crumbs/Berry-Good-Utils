@@ -12,11 +12,11 @@ using System.Reflection;
 
 [assembly: System.Reflection.AssemblyCompanyAttribute("BerryGoodUtils")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
-[assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.4")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.4+2e121de2e9c880c484831fc7c97509604f2f5316")]
+[assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.5+a499084cc159454e9014706555df4ac8ef72b61e")]
 [assembly: System.Reflection.AssemblyProductAttribute("BerryGoodUtils")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BerryGoodUtils")]
-[assembly: System.Reflection.AssemblyVersionAttribute("1.0.4")]
+[assembly: System.Reflection.AssemblyVersionAttribute("1.0.5")]
 [assembly: System.Runtime.Versioning.TargetPlatformAttribute("Windows7.0")]
 [assembly: System.Runtime.Versioning.SupportedOSPlatformAttribute("Windows7.0")]
 

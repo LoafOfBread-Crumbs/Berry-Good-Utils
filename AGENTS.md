@@ -14,7 +14,7 @@ A modular WPF desktop utility suite built with .NET 8.
 
 ## Build & Run
 
-The project targets `net8.0-windows` and requires the .NET 8 SDK.
+The project targets `net8.0-windows10.0.19041.0` and requires the .NET 8 SDK.
 
 ```powershell
 # Build
@@ -35,6 +35,7 @@ Each module implements `IUtilityModule`:
 
 - **Quote Generator** — Create customer quotes, add line items, and export to HTML/PDF. Quotes can be saved under a customer folder or as a business quote. Based on `Demo/QuoteGenerator`.
 - **Part Request** — Build supplier part/service requests and generate an email-ready HTML or plain-text file.
+- **Inventory Manager** — Add, edit, and remove parts from the shared inventory. Parts carry extra identifiers (manufacturer, equipment type, part/model/serial/reference numbers, voltage, amps, frequency, phase, horsepower, kW, IP rating, refrigerant, pressures/outputs, weight, approval/build/barcode data, country of manufacture, notes) and an optional reference image that can be attached to quotes or part requests. Individual fields can be toggled on/off for inclusion in outgoing emails. You can also add a part from a reference image: the app uses Windows OCR to read the nameplate, extracts the details, and shows them in a review window for editing before saving.
 
 ## Adding a New Module
 

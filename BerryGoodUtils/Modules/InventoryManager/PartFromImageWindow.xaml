@@ -1,0 +1,268 @@
+<Window x:Class="BerryGoodUtils.Modules.InventoryManager.PartFromImageWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Add Part from Image" Height="620" Width="680"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanResize"
+        Background="#f0f4f8" MinHeight="520" MinWidth="560"
+        Loaded="Window_Loaded">
+
+    <Window.Resources>
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="#555"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+        <Style x:Key="InputBox" TargetType="TextBox">
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="BorderBrush" Value="#cbd5e1"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Review extracted part details" FontSize="18" FontWeight="Bold"
+                   Foreground="{StaticResource BerryBlueBrush}" Margin="0,0,0,16"/>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="220"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Reference Image" Style="{StaticResource FieldLabel}"/>
+                        <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="6" Background="White">
+                            <Image x:Name="imgPreview" Stretch="Uniform" MaxHeight="160"/>
+                        </Border>
+
+                        <TextBlock Text="Raw OCR Text" Style="{StaticResource FieldLabel}" Margin="0,10,0,4"/>
+                        <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="6" Background="White">
+                            <TextBox x:Name="txtRawOcr" Style="{StaticResource InputBox}" Height="100"
+                                     AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+                                     IsReadOnly="True" Background="#f8fafc"/>
+                        </Border>
+                        <Button Content="Re-run OCR" Style="{StaticResource SecondaryButton}" Click="ReRunOcr_Click" Margin="0,8,0,0" HorizontalAlignment="Left"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Part Name" Style="{StaticResource FieldLabel}"/>
+                        <TextBox x:Name="txtName" Style="{StaticResource InputBox}"/>
+
+                        <Grid Margin="0,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Manufacturer" Style="{StaticResource FieldLabel}"/>
+                                <TextBox x:Name="txtManufacturer" Style="{StaticResource InputBox}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Equipment Type" Style="{StaticResource FieldLabel}"/>
+                                <TextBox x:Name="txtEquipmentType" Style="{StaticResource InputBox}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Part Number" Style="{StaticResource FieldLabel}"/>
+                                <TextBox x:Name="txtPartNumber" Style="{StaticResource InputBox}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Model Number" Style="{StaticResource FieldLabel}"/>
+                                <TextBox x:Name="txtModelNumber" Style="{StaticResource InputBox}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Serial Number" Style="{StaticResource FieldLabel}"/>
+                                <TextBox x:Name="txtSerialNumber" Style="{StaticResource InputBox}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Reference Number" Style="{StaticResource FieldLabel}"/>
+                                <TextBox x:Name="txtReferenceNumber" Style="{StaticResource InputBox}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Text="Additional Identifier" Style="{StaticResource FieldLabel}"/>
+                        <TextBox x:Name="txtAdditionalIdentifier" Style="{StaticResource InputBox}"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="120"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Description" Style="{StaticResource FieldLabel}"/>
+                                <TextBox x:Name="txtDescription" Style="{StaticResource InputBox}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Default Price" Style="{StaticResource FieldLabel}"/>
+                                <TextBox x:Name="txtDefaultPrice" Style="{StaticResource InputBox}" Text="0.00"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Expander Header="Technical Specifications" Margin="0,0,0,10" IsExpanded="False"
+                                  BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Padding="8">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="8"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="8"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="8"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Grid.Row="0" Grid.Column="0">
+                                        <TextBlock Text="Voltage" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="txtVoltage" Style="{StaticResource InputBox}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="0" Grid.Column="2">
+                                        <TextBlock Text="Amps" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="txtAmps" Style="{StaticResource InputBox}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="2" Grid.Column="0">
+                                        <TextBlock Text="Frequency" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="txtFrequency" Style="{StaticResource InputBox}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="2" Grid.Column="2">
+                                        <TextBlock Text="Phase" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="txtPhase" Style="{StaticResource InputBox}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="4" Grid.Column="0">
+                                        <TextBlock Text="Horsepower" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="txtHorsepower" Style="{StaticResource InputBox}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="4" Grid.Column="2">
+                                        <TextBlock Text="kW" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="txtKilowatts" Style="{StaticResource InputBox}"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="8"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="8"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="8"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="8"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Grid.Row="0" Grid.Column="0">
+                                        <TextBlock Text="IP Rating" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="txtIPRating" Style="{StaticResource InputBox}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="0" Grid.Column="2">
+                                        <TextBlock Text="Refrigerant" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="txtRefrigerant" Style="{StaticResource InputBox}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="2" Grid.Column="0">
+                                        <TextBlock Text="Refrigerant Charge" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="txtRefrigerantCharge" Style="{StaticResource InputBox}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="2" Grid.Column="2">
+                                        <TextBlock Text="Max Cell Pressure" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="txtMaxCellPressure" Style="{StaticResource InputBox}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="4" Grid.Column="0">
+                                        <TextBlock Text="Max Pressure" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="txtMaxPressure" Style="{StaticResource InputBox}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="4" Grid.Column="2">
+                                        <TextBlock Text="Max Head" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="txtMaxHead" Style="{StaticResource InputBox}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="6" Grid.Column="0">
+                                        <TextBlock Text="Target Output" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="txtTargetOutput" Style="{StaticResource InputBox}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="6" Grid.Column="2">
+                                        <TextBlock Text="Gross Weight" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="txtGrossWeight" Style="{StaticResource InputBox}"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="8"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="8"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="8"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Grid.Row="0" Grid.Column="0">
+                                        <TextBlock Text="Approval Number" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="txtApprovalNumber" Style="{StaticResource InputBox}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="0" Grid.Column="2">
+                                        <TextBlock Text="Build Date" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="txtBuildDate" Style="{StaticResource InputBox}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="2" Grid.Column="0">
+                                        <TextBlock Text="Barcode" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="txtBarcode" Style="{StaticResource InputBox}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="2" Grid.Column="2">
+                                        <TextBlock Text="Country of Mfg" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="txtCountryOfManufacture" Style="{StaticResource InputBox}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3">
+                                        <TextBlock Text="Notes" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="txtNotes" Style="{StaticResource InputBox}" AcceptsReturn="True"
+                                                 TextWrapping="Wrap" Height="50" VerticalScrollBarVisibility="Auto"/>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Expander>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border Grid.Row="2" Background="White" Padding="0,12,0,0" Margin="0,10,0,0">
+            <WrapPanel HorizontalAlignment="Right">
+                <Button Content="Cancel" Style="{StaticResource SecondaryButton}" Click="Cancel_Click" Margin="0,0,8,0"/>
+                <Button Content="Add Part" Style="{StaticResource ActionButton}" Click="AddPart_Click"/>
+            </WrapPanel>
+        </Border>
+    </Grid>
+</Window>

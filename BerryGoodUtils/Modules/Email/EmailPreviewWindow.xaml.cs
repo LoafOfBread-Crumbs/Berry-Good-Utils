@@ -32,8 +32,23 @@ public partial class EmailPreviewWindow : Window
         MaxHeight = Math.Max(MinHeight, SystemParameters.WorkArea.Height - 40);
         if (Height > MaxHeight)
             Height = MaxHeight;
+        RefreshAttachmentLabel();
         await UpdatePreviewAsync();
         await RefreshStatusAsync();
+    }
+
+    private void RefreshAttachmentLabel()
+    {
+        if (_message.Attachments.Count == 0)
+        {
+            txtAttachments.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        txtAttachments.Text = _message.Attachments.Count == 1
+            ? $"Attachment: {_message.Attachments[0].FileName}"
+            : $"Attachments: {_message.Attachments.Count} files";
+        txtAttachments.Visibility = Visibility.Visible;
     }
 
     private async Task RefreshStatusAsync()

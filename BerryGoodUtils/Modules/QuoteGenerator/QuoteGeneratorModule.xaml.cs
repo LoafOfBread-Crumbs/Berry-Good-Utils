@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using BerryGoodUtils.Core.Email;
@@ -30,6 +31,13 @@ public partial class QuoteGeneratorModule : UserControl, IUtilityModule
         dgItems.ItemsSource = _quoteItems;
         RefreshPartsDropdown();
         RefreshCustomerDropdown();
+        Loaded += (_, _) => RefreshData();
+    }
+
+    private void RefreshData()
+    {
+        _appData = DataService.LoadAppData();
+        RefreshPartsDropdown();
     }
 
     private void RefreshCustomerDropdown()
@@ -93,7 +101,14 @@ public partial class QuoteGeneratorModule : UserControl, IUtilityModule
             {
                 txtDescription.Text = part.Description;
                 txtUnitPrice.Text = part.DefaultPrice.ToString("F2");
+                chkAttachReferenceImage.IsEnabled = part.HasReferenceImage;
+                chkAttachReferenceImage.IsChecked = part.HasReferenceImage;
             }
+        }
+        else
+        {
+            chkAttachReferenceImage.IsEnabled = false;
+            chkAttachReferenceImage.IsChecked = false;
         }
     }
 
@@ -123,7 +138,8 @@ public partial class QuoteGeneratorModule : UserControl, IUtilityModule
             PartOrService = partName,
             Description = txtDescription.Text?.Trim() ?? string.Empty,
             Quantity = qty,
-            UnitPrice = price
+            UnitPrice = price,
+            IncludeReferenceImage = chkAttachReferenceImage.IsChecked == true
         };
 
         _quoteItems.Add(item);
@@ -148,6 +164,8 @@ public partial class QuoteGeneratorModule : UserControl, IUtilityModule
         txtDescription.Text = string.Empty;
         txtQuantity.Text = "1";
         txtUnitPrice.Text = "0.00";
+        chkAttachReferenceImage.IsChecked = false;
+        chkAttachReferenceImage.IsEnabled = false;
     }
 
     private void RemoveItem_Click(object sender, RoutedEventArgs e)
@@ -182,6 +200,8 @@ public partial class QuoteGeneratorModule : UserControl, IUtilityModule
             txtDescription.Text = string.Empty;
             txtQuantity.Text = "1";
             txtUnitPrice.Text = "0.00";
+            chkAttachReferenceImage.IsChecked = false;
+            chkAttachReferenceImage.IsEnabled = false;
         }
     }
 
@@ -266,10 +286,48 @@ public partial class QuoteGeneratorModule : UserControl, IUtilityModule
         if (_lastGeneratedQuote == null)
             return;
 
-        var message = EmailMessageFactory.ForQuote(_lastGeneratedQuote, _appData.Company);
+        var attachments = CollectReferenceImageAttachments(_lastGeneratedQuote.Items);
+        var message = EmailMessageFactory.ForQuote(_lastGeneratedQuote, _appData.Company, attachments, _appData.SavedParts);
         new EmailPreviewWindow(message, _emailSender, _appData,
-            () => EmailMessageFactory.ForQuote(_lastGeneratedQuote!, _appData.Company))
+            () => EmailMessageFactory.ForQuote(_lastGeneratedQuote!, _appData.Company, CollectReferenceImageAttachments(_lastGeneratedQuote.Items), _appData.SavedParts))
         { Owner = Window.GetWindow(this) }.ShowDialog();
+    }
+
+    private List<EmailAttachment> CollectReferenceImageAttachments(IEnumerable<QuoteItem> items)
+    {
+        var attachments = new List<EmailAttachment>();
+        foreach (var item in items.Where(i => i.IncludeReferenceImage))
+        {
+            var part = _appData.SavedParts.FirstOrDefault(p => p.Name.Equals(item.PartOrService, StringComparison.OrdinalIgnoreCase));
+            if (part?.HasReferenceImage != true)
+                continue;
+
+            var path = part.ReferenceImagePath;
+            if (attachments.Any(a => a.FilePath.Equals(path, StringComparison.OrdinalIgnoreCase)))
+                continue;
+
+            attachments.Add(new EmailAttachment
+            {
+                FileName = Path.GetFileName(path),
+                FilePath = path,
+                ContentType = GetImageMimeType(path)
+            });
+        }
+
+        return attachments;
+    }
+
+    private static string GetImageMimeType(string filePath)
+    {
+        return Path.GetExtension(filePath).ToLowerInvariant() switch
+        {
+            ".png" => "image/png",
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".gif" => "image/gif",
+            ".bmp" => "image/bmp",
+            ".webp" => "image/webp",
+            _ => "application/octet-stream"
+        };
     }
 
     private void CompanySettings_Click(object sender, RoutedEventArgs e)

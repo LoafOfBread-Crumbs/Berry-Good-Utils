@@ -97,6 +97,25 @@ public sealed class GmailEmailSender : IEmailSender
             HtmlBody = EmailMessageFactory.BuildHtmlBody(message),
             TextBody = $"{message.Introduction}\n\n{message.TextContent}"
         };
+
+        foreach (var attachment in message.Attachments)
+        {
+            if (!File.Exists(attachment.FilePath))
+                continue;
+
+            var bytes = File.ReadAllBytes(attachment.FilePath);
+            var contentType = ContentType.Parse(attachment.ContentType);
+            var part = new MimePart(contentType)
+            {
+                Content = new MimeContent(new MemoryStream(bytes)),
+                ContentTransferEncoding = ContentEncoding.Base64,
+                ContentDisposition = new ContentDisposition(ContentDisposition.Inline),
+                ContentId = attachment.ContentId,
+                FileName = attachment.FileName
+            };
+            builder.LinkedResources.Add(part);
+        }
+
         mime.Body = builder.ToMessageBody();
 
         await using var memory = new MemoryStream();
