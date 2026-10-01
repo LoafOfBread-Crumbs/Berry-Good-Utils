@@ -21,6 +21,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0" Orientation="Horizontal">
@@ -35,7 +36,13 @@
                 </StackPanel>
             </StackPanel>
 
-            <Button Grid.Column="1" x:Name="btnBack" Content="&#x2190; Back to Dashboard" Style="{StaticResource BackButton}"
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
+                <TextBlock x:Name="txtGoogleStatus" Text="Google: checking..." FontSize="13" Foreground="#64748b" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <Button x:Name="btnGoogleSignIn" Content="Sign in to Google" Style="{StaticResource SecondaryButton}" Padding="10,5" Click="GoogleSignIn_Click" Margin="0,0,8,0"/>
+                <Button x:Name="btnGoogleSignOut" Content="Sign out" Style="{StaticResource SecondaryButton}" Padding="10,5" Click="GoogleSignOut_Click" Visibility="Collapsed"/>
+            </StackPanel>
+
+            <Button Grid.Column="2" x:Name="btnBack" Content="&#x2190; Back to Dashboard" Style="{StaticResource BackButton}"
                     Visibility="Collapsed" Click="Back_Click" VerticalAlignment="Center"/>
         </Grid>
 

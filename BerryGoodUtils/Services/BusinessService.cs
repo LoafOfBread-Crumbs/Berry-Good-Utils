@@ -17,14 +17,6 @@ public static class BusinessService
         return RootFolder;
     }
 
-    public static string GetQuotesFolder()
-    {
-        var folder = Path.Combine(GetRootFolder(), "Quotes");
-        if (!Directory.Exists(folder))
-            Directory.CreateDirectory(folder);
-        return folder;
-    }
-
     public static string GetPartRequestsFolder()
     {
         var folder = Path.Combine(GetRootFolder(), "PartRequests");

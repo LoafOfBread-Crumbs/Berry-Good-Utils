@@ -34,15 +34,6 @@ public static class CustomerService
         return path;
     }
 
-    public static string GetQuotesFolder(Customer customer)
-    {
-        var customerFolder = GetCustomerFolderPath(customer);
-        var quotesFolder = Path.Combine(customerFolder, "Quotes");
-        if (!Directory.Exists(quotesFolder))
-            Directory.CreateDirectory(quotesFolder);
-        return quotesFolder;
-    }
-
     public static void OpenRootFolder()
     {
         var folder = GetRootFolder();

@@ -7,18 +7,12 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Title Bar -->
-        <Border Grid.Row="0" Background="{StaticResource BerryBlueBrush}" CornerRadius="6,6,0,0" Padding="16,12">
-            <TextBlock Text="Inventory Manager" FontSize="22" FontWeight="Bold" Foreground="White"/>
-        </Border>
-
         <!-- Main Content -->
-        <Border Grid.Row="1" Background="White" CornerRadius="0,0,6,6" Padding="20" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1,0,1,1">
+        <Border Grid.Row="0" Background="White" CornerRadius="6" Padding="20" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -28,7 +22,7 @@
 
                 <!-- Parts List -->
                 <StackPanel Grid.Column="0">
-                    <TextBlock Text="Inventory Parts" Style="{StaticResource HeaderText}"/>
+                    <TextBlock Text="Catalogue Parts" Style="{StaticResource HeaderText}"/>
                     <DataGrid x:Name="dgParts" AutoGenerateColumns="False" CanUserAddRows="False"
                               HeadersVisibility="Column" GridLinesVisibility="Horizontal"
                               BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" MinHeight="200"
@@ -284,7 +278,7 @@
                                   BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Padding="8">
                             <StackPanel>
                                 <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,8">
-                                    Checked fields are shown when this part is added to a part request or quote email. Empty fields are always hidden.
+                                    Checked fields are shown when this part is added to a part request email. Empty fields are always hidden.
                                 </TextBlock>
                                 <WrapPanel x:Name="wpEmailFields"/>
                                 <WrapPanel Margin="0,8,0,0">

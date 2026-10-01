@@ -1,6 +1,6 @@
 using System.IO;
 using BerryGoodUtils.Core.Email;
-using Google.Apis.Auth.OAuth2;
+using BerryGoodUtils.Services.Auth;
 using Google.Apis.Gmail.v1;
 using Google.Apis.Gmail.v1.Data;
 using Google.Apis.Services;
@@ -11,82 +11,47 @@ namespace BerryGoodUtils.Services.Email;
 public sealed class GmailEmailSender : IEmailSender
 {
     private const string UserId = "me";
-    private readonly string _configurationPath;
-    private readonly ProtectedTokenStore _tokenStore;
-    private UserCredential? _credential;
+    private readonly GoogleAuthService _authService;
     private string? _emailAddress;
 
-    public GmailEmailSender()
+    public GmailEmailSender(GoogleAuthService authService)
     {
-        var folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BerryGoodUtils");
-        _configurationPath = Path.Combine(folder, "gmail-oauth-client.json");
-        _tokenStore = new ProtectedTokenStore(Path.Combine(folder, "GmailTokens"));
+        _authService = authService;
     }
 
-    public async Task<EmailAccountStatus> GetStatusAsync(CancellationToken cancellationToken = default)
+    public Task<EmailAccountStatus> GetStatusAsync(CancellationToken cancellationToken = default)
     {
-        if (!File.Exists(_configurationPath))
-            return new(false, false, null, $"Gmail OAuth is not configured. Add the downloaded Desktop OAuth JSON file at {_configurationPath}");
-        if (_credential == null && _tokenStore.HasStoredTokens)
-        {
-            try
-            {
-                await SignInAsync(cancellationToken);
-            }
-            catch
-            {
-                return new(true, false, null, "The saved Gmail session has expired. Please sign in again.");
-            }
-        }
-        if (_credential == null)
-            return new(true, false, null);
-        if (string.IsNullOrWhiteSpace(_emailAddress))
-            _emailAddress = await GetEmailAddressAsync(_credential, cancellationToken);
-        return new(true, true, _emailAddress);
+        if (!_authService.IsConfigured)
+            return Task.FromResult(new EmailAccountStatus(false, false, null, "Gmail OAuth is not configured. Add the downloaded Desktop OAuth JSON file in the app data folder."));
+
+        if (!_authService.IsSignedIn)
+            return Task.FromResult(new EmailAccountStatus(true, false, null, "Not signed in. Sign in from the main dashboard."));
+
+        return Task.FromResult(new EmailAccountStatus(true, true, _emailAddress, null));
     }
 
     public async Task<string> SignInAsync(CancellationToken cancellationToken = default)
     {
-        if (!File.Exists(_configurationPath))
-            throw new InvalidOperationException($"Gmail OAuth configuration was not found. Download Desktop OAuth credentials and save them as {_configurationPath}");
-
-        await using var stream = File.OpenRead(_configurationPath);
-        var secrets = GoogleClientSecrets.FromStream(stream).Secrets;
-        _credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
-            secrets,
-            [GmailService.Scope.GmailSend, GmailService.Scope.GmailMetadata],
-            "BerryGoodUtils",
-            cancellationToken,
-            _tokenStore);
-        _emailAddress = await GetEmailAddressAsync(_credential, cancellationToken);
+        var credential = await _authService.GetCredentialAsync(cancellationToken);
+        _emailAddress = await GetEmailAddressAsync(credential, cancellationToken);
         return _emailAddress;
     }
 
-    public async Task SignOutAsync(CancellationToken cancellationToken = default)
+    public Task SignOutAsync(CancellationToken cancellationToken = default)
     {
-        if (_credential != null)
-        {
-            try
-            {
-                await _credential.RevokeTokenAsync(cancellationToken);
-            }
-            catch
-            {
-            }
-        }
-        await _tokenStore.ClearAsync();
-        _credential = null;
         _emailAddress = null;
+        return _authService.RevokeAsync(cancellationToken);
     }
 
     public async Task SendAsync(EmailMessage message, CancellationToken cancellationToken = default)
     {
         EmailMessageFactory.Validate(message);
-        if (_credential == null)
-            await SignInAsync(cancellationToken);
+        if (!_authService.HasStoredTokens)
+            throw new InvalidOperationException("Please sign in to Google from the main dashboard before sending email.");
+        var credential = await _authService.GetCredentialAsync(cancellationToken);
 
         var mime = new MimeMessage();
-        mime.From.Add(MailboxAddress.Parse(_emailAddress ?? await GetEmailAddressAsync(_credential!, cancellationToken)));
+        mime.From.Add(MailboxAddress.Parse(_emailAddress ?? await GetEmailAddressAsync(credential, cancellationToken)));
         AddAddresses(mime.To, message.To);
         AddAddresses(mime.Cc, message.Cc);
         AddAddresses(mime.Bcc, message.Bcc);
@@ -121,18 +86,18 @@ public sealed class GmailEmailSender : IEmailSender
         await using var memory = new MemoryStream();
         await mime.WriteToAsync(memory, cancellationToken);
         var raw = Convert.ToBase64String(memory.ToArray()).Replace('+', '-').Replace('/', '_').TrimEnd('=');
-        using var service = CreateService(_credential!);
+        using var service = CreateService(credential);
         await service.Users.Messages.Send(new Message { Raw = raw }, UserId).ExecuteAsync(cancellationToken);
     }
 
-    private async Task<string> GetEmailAddressAsync(UserCredential credential, CancellationToken cancellationToken)
+    private async Task<string> GetEmailAddressAsync(Google.Apis.Auth.OAuth2.UserCredential credential, CancellationToken cancellationToken)
     {
         using var service = CreateService(credential);
         var profile = await service.Users.GetProfile(UserId).ExecuteAsync(cancellationToken);
         return profile.EmailAddress;
     }
 
-    private static GmailService CreateService(UserCredential credential)
+    private static GmailService CreateService(Google.Apis.Auth.OAuth2.UserCredential credential)
     {
         return new GmailService(new BaseClientService.Initializer
         {

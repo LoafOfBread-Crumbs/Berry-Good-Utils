@@ -1,6 +1,9 @@
+using BerryGoodUtils.Modules.CustomerManagement;
 using BerryGoodUtils.Modules.InventoryManager;
 using BerryGoodUtils.Modules.PartRequest;
-using BerryGoodUtils.Modules.QuoteGenerator;
+using BerryGoodUtils.Modules.Scheduling;
+using BerryGoodUtils.Modules.SupplierPortal;
+using BerryGoodUtils.Services.Auth;
 using BerryGoodUtils.Services.Email;
 
 namespace BerryGoodUtils.Modules;
@@ -15,12 +18,15 @@ namespace BerryGoodUtils.Modules;
 /// </summary>
 public static class ModuleRegistry
 {
-    private static readonly GmailEmailSender EmailSender = new();
+    public static GoogleAuthService GoogleAuth { get; } = new();
+    public static GmailEmailSender EmailSender { get; } = new(GoogleAuth);
 
     public static IReadOnlyList<IUtilityModule> Modules { get; } = new List<IUtilityModule>
     {
-        new QuoteGeneratorModule(EmailSender),
+        new CustomerManagementModule(),
         new PartRequestModule(EmailSender),
-        new InventoryManagerModule()
+        new InventoryManagerModule(),
+        new SchedulingModule(GoogleAuth),
+        new SupplierPortalModule()
     };
 }

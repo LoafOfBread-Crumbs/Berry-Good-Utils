@@ -5,8 +5,8 @@ using System.Windows;
 using System.Windows.Controls;
 using BerryGoodUtils.Core.Email;
 using BerryGoodUtils.Models;
+using BerryGoodUtils.Modules.Common;
 using BerryGoodUtils.Modules.Email;
-using BerryGoodUtils.Modules.QuoteGenerator;
 using BerryGoodUtils.Services;
 using Microsoft.Win32;
 

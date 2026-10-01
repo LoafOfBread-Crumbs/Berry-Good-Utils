@@ -18,9 +18,7 @@
             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
             <TextBlock x:Name="txtAccount" VerticalAlignment="Center" FontWeight="SemiBold" Text="Gmail: Checking account..."/>
             <WrapPanel Grid.Column="1" HorizontalAlignment="Right">
-                <Button x:Name="btnCompanyDetails" Content="Edit Company Details" Click="CompanyDetails_Click" Padding="10,5" Margin="0,0,8,4"/>
-                <Button x:Name="btnSignIn" Content="Sign in / Change account" Click="SignIn_Click" Padding="10,5" Margin="0,0,8,4"/>
-                <Button x:Name="btnSignOut" Content="Sign out" Click="SignOut_Click" Padding="10,5" Margin="0,0,0,4"/>
+                <Button x:Name="btnCompanyDetails" Content="Edit Company Details" Click="CompanyDetails_Click" Padding="10,5" Margin="0,0,0,4"/>
             </WrapPanel>
         </Grid>
         <Grid Grid.Row="1" Margin="0,0,0,8">

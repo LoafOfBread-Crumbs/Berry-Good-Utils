@@ -1,7 +1,7 @@
 using System.Windows;
 using BerryGoodUtils.Core.Email;
 using BerryGoodUtils.Models;
-using BerryGoodUtils.Modules.QuoteGenerator;
+using BerryGoodUtils.Modules.Common;
 
 namespace BerryGoodUtils.Modules.Email;
 
@@ -34,7 +34,7 @@ public partial class EmailPreviewWindow : Window
             Height = MaxHeight;
         RefreshAttachmentLabel();
         await UpdatePreviewAsync();
-        await RefreshStatusAsync();
+        await RefreshAccountStatusAsync();
     }
 
     private void RefreshAttachmentLabel()
@@ -51,20 +51,18 @@ public partial class EmailPreviewWindow : Window
         txtAttachments.Visibility = Visibility.Visible;
     }
 
-    private async Task RefreshStatusAsync()
+    private async Task RefreshAccountStatusAsync()
     {
         try
         {
             var status = await _emailSender.GetStatusAsync();
             txtAccount.Text = status.IsSignedIn
                 ? $"Gmail: {status.EmailAddress}"
-                : status.IsConfigured ? "Gmail: Not signed in" : status.Message;
-            btnSignOut.IsEnabled = status.IsSignedIn;
+                : status.IsConfigured ? "Gmail: not signed in" : status.Message;
         }
         catch (Exception ex)
         {
             txtAccount.Text = $"Gmail: {ex.Message}";
-            btnSignOut.IsEnabled = false;
         }
     }
 
@@ -81,47 +79,6 @@ public partial class EmailPreviewWindow : Window
         _message.TextContent = refreshed.TextContent;
         txtSubject.Text = _message.Subject;
         await UpdatePreviewAsync();
-    }
-
-    private async void SignIn_Click(object sender, RoutedEventArgs e)
-    {
-        SetBusy(true);
-        try
-        {
-            var current = await _emailSender.GetStatusAsync();
-            if (current.IsSignedIn)
-                await _emailSender.SignOutAsync();
-            var account = await _emailSender.SignInAsync();
-            txtAccount.Text = $"Gmail: {account}";
-            btnSignOut.IsEnabled = true;
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show(ex.Message, "Gmail Sign In", MessageBoxButton.OK, MessageBoxImage.Error);
-            await RefreshStatusAsync();
-        }
-        finally
-        {
-            SetBusy(false);
-        }
-    }
-
-    private async void SignOut_Click(object sender, RoutedEventArgs e)
-    {
-        SetBusy(true);
-        try
-        {
-            await _emailSender.SignOutAsync();
-            await RefreshStatusAsync();
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show(ex.Message, "Gmail Sign Out", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-        finally
-        {
-            SetBusy(false);
-        }
     }
 
     private async void Send_Click(object sender, RoutedEventArgs e)
@@ -187,8 +144,6 @@ public partial class EmailPreviewWindow : Window
     {
         btnSend.IsEnabled = !busy;
         btnCompanyDetails.IsEnabled = !busy;
-        btnSignIn.IsEnabled = !busy;
-        btnSignOut.IsEnabled = !busy;
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e)

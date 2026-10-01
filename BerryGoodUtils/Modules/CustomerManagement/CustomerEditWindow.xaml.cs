@@ -1,7 +1,7 @@
 using System.Windows;
 using BerryGoodUtils.Models;
 
-namespace BerryGoodUtils.Modules.QuoteGenerator;
+namespace BerryGoodUtils.Modules.CustomerManagement;
 
 public partial class CustomerEditWindow : Window
 {

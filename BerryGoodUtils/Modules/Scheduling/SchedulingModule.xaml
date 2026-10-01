@@ -1,0 +1,157 @@
+<UserControl x:Class="BerryGoodUtils.Modules.Scheduling.SchedulingModule"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="White" CornerRadius="6" Padding="20" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="380"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Calendar -->
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="&lt;" Style="{StaticResource SecondaryButton}" Padding="10,5" Click="PrevMonth_Click"/>
+                        <TextBlock Grid.Column="1" x:Name="tbMonthYear" FontSize="18" FontWeight="SemiBold" Foreground="#334155" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Button Grid.Column="2" Content=">" Style="{StaticResource SecondaryButton}" Padding="10,5" Click="NextMonth_Click"/>
+                    </Grid>
+
+                    <Border Grid.Row="1" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="6" Background="White">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Day headers -->
+                            <Border Grid.Row="0" Grid.Column="0" Background="#f8fafc" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="4">
+                                <TextBlock Text="Sun" HorizontalAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="#64748b"/></Border>
+                            <Border Grid.Row="0" Grid.Column="1" Background="#f8fafc" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="4">
+                                <TextBlock Text="Mon" HorizontalAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="#64748b"/></Border>
+                            <Border Grid.Row="0" Grid.Column="2" Background="#f8fafc" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="4">
+                                <TextBlock Text="Tue" HorizontalAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="#64748b"/></Border>
+                            <Border Grid.Row="0" Grid.Column="3" Background="#f8fafc" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="4">
+                                <TextBlock Text="Wed" HorizontalAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="#64748b"/></Border>
+                            <Border Grid.Row="0" Grid.Column="4" Background="#f8fafc" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="4">
+                                <TextBlock Text="Thu" HorizontalAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="#64748b"/></Border>
+                            <Border Grid.Row="0" Grid.Column="5" Background="#f8fafc" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="4">
+                                <TextBlock Text="Fri" HorizontalAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="#64748b"/></Border>
+                            <Border Grid.Row="0" Grid.Column="6" Background="#f8fafc" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="4">
+                                <TextBlock Text="Sat" HorizontalAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="#64748b"/></Border>
+
+                            <!-- Day cells generated in code-behind -->
+                            <UniformGrid x:Name="calendarDaysGrid" Grid.Row="1" Grid.RowSpan="6" Grid.Column="0" Grid.ColumnSpan="7" Rows="6" Columns="7" IsHitTestVisible="False"/>
+
+                            <!-- Click overlay to capture day selections -->
+                            <UniformGrid x:Name="calendarClickGrid" Grid.Row="1" Grid.RowSpan="6" Grid.Column="0" Grid.ColumnSpan="7" Rows="6" Columns="7" Background="Transparent"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- Details / Agenda -->
+                <Grid Grid.Column="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="16"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="Selected Date" Style="{StaticResource HeaderText}" Margin="0,0,0,8"/>
+                    <Border Grid.Row="1" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="6" Background="White" Padding="8">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <TextBlock x:Name="tbSelectedDate" FontSize="14" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,8"/>
+                                <ItemsControl x:Name="icSelectedDateSchedules">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,0,0,8" Background="#f8fafc" MouseLeftButtonUp="ScheduleItem_Click">
+                                                <Border.Tag>
+                                                    <Binding/>
+                                                </Border.Tag>
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding CustomerName}" FontSize="12" Foreground="{StaticResource TextMutedBrush}" TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding TimeRange}" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock x:Name="tbNoSelectedSchedules" Text="No schedules for this date." Foreground="{StaticResource TextMutedBrush}" FontSize="13" FontStyle="Italic" Visibility="Collapsed"/>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Border>
+
+                    <TextBlock Grid.Row="3" Text="Upcoming Schedules" Style="{StaticResource HeaderText}" Margin="0,0,0,8"/>
+                    <Border Grid.Row="4" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="6" Background="White" Padding="8">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <DataGrid x:Name="dgUpcoming" AutoGenerateColumns="False" CanUserAddRows="False" HeadersVisibility="Column"
+                                          GridLinesVisibility="Horizontal" BorderThickness="0" Background="White" RowBackground="White"
+                                          AlternatingRowBackground="#f8fafc" HorizontalGridLinesBrush="#f1f5f9" FontSize="13" IsReadOnly="True"
+                                          SelectionMode="Single" SelectionChanged="DgUpcoming_SelectionChanged">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Date" Binding="{Binding NextDate, StringFormat=yyyy-MM-dd}" Width="100"/>
+                                        <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="*"/>
+                                        <DataGridTextColumn Header="Customer" Binding="{Binding CustomerName}" Width="*"/>
+                                        <DataGridTextColumn Header="Recurrence" Binding="{Binding RecurrenceLabel}" Width="110"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <TextBlock x:Name="tbNoUpcoming" Text="No upcoming schedules." Foreground="{StaticResource TextMutedBrush}" FontSize="13" FontStyle="Italic" Visibility="Collapsed" Margin="0,8,0,0"/>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- Bottom Actions -->
+        <Border Grid.Row="1" Margin="0,10,0,0">
+            <WrapPanel HorizontalAlignment="Right">
+                <Button Content="Add Schedule" Style="{StaticResource SecondaryButton}" Click="AddSchedule_Click" Margin="0,0,8,8"/>
+                <Button x:Name="btnEdit" Content="Edit Selected" Style="{StaticResource SecondaryButton}" Click="EditSchedule_Click" IsEnabled="False" Margin="0,0,8,8"/>
+                <Button x:Name="btnDelete" Content="Delete Selected" Style="{StaticResource DangerButton}" Click="DeleteSchedule_Click" IsEnabled="False" Margin="0,0,8,8"/>
+                <Button x:Name="btnSync" Content="Sync Selected" Style="{StaticResource SecondaryButton}" Click="SyncSelected_Click" IsEnabled="False" Margin="0,0,8,8"/>
+                <Button Content="Sync All to Google" Style="{StaticResource SecondaryButton}" Click="SyncAll_Click" Margin="0,0,8,8"/>
+                <Button Content="Refresh" Style="{StaticResource SecondaryButton}" Click="Refresh_Click" Margin="0,0,0,8"/>
+            </WrapPanel>
+        </Border>
+    </Grid>
+</UserControl>

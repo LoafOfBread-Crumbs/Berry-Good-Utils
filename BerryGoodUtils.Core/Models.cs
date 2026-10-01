@@ -9,7 +9,50 @@ public class AppData
     public ObservableCollection<SavedPart> SavedParts { get; set; } = new();
     public ObservableCollection<Customer> Customers { get; set; } = new();
     public ObservableCollection<Supplier> Suppliers { get; set; } = new();
+    public ObservableCollection<CustomerSchedule> Schedules { get; set; } = new();
     public int NextQuoteNumber { get; set; } = 1001;
+}
+
+public enum ScheduleRecurrenceType
+{
+    None,
+    Weekly,
+    BiWeekly,
+    Monthly,
+    Yearly,
+    CustomInterval,
+    SpecificDates
+}
+
+public enum CustomIntervalUnit
+{
+    Days,
+    Weeks,
+    Months,
+    Years
+}
+
+public class CustomerSchedule
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public string CustomerId { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string Location { get; set; } = string.Empty;
+    public DateTime StartDateTime { get; set; } = DateTime.Now;
+    public DateTime EndDateTime { get; set; } = DateTime.Now.AddHours(1);
+    public ScheduleRecurrenceType RecurrenceType { get; set; } = ScheduleRecurrenceType.None;
+    public int CustomIntervalValue { get; set; } = 1;
+    public CustomIntervalUnit CustomIntervalUnit { get; set; } = CustomIntervalUnit.Weeks;
+    public List<DateTime> SpecificDates { get; set; } = [];
+    public int ReminderMinutesBefore { get; set; } = 30;
+    public string GoogleCalendarEventId { get; set; } = string.Empty;
+    public List<string> GoogleCalendarEventIds { get; set; } = [];
+    public bool IsSynced { get; set; }
+    public DateTime? LastSyncedAt { get; set; }
+    public string SyncError { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime UpdatedAt { get; set; } = DateTime.Now;
 }
 
 public class CompanyInfo
@@ -38,6 +81,16 @@ public class Supplier
     public string Email { get; set; } = string.Empty;
     public string Phone { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public List<SupplierPortalLink> PortalLinks { get; set; } = [];
+}
+
+public class SupplierPortalLink
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public string Name { get; set; } = string.Empty;
+    public string Url { get; set; } = string.Empty;
+    public string Notes { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 }
 

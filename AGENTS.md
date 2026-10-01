@@ -33,9 +33,10 @@ Once `dotnet.exe` is on your PATH, you can also use `dotnet build` and `dotnet r
 
 Each module implements `IUtilityModule`:
 
-- **Quote Generator** — Create customer quotes, add line items, and export to HTML/PDF. Quotes can be saved under a customer folder or as a business quote. Based on `Demo/QuoteGenerator`.
+- **Customer Management** — Add, edit, and remove customer records used across the utility suite. Customers can be opened directly from their folders on disk.
 - **Part Request** — Build supplier part/service requests and generate an email-ready HTML or plain-text file.
-- **Inventory Manager** — Add, edit, and remove parts from the shared inventory. Parts carry extra identifiers (manufacturer, equipment type, part/model/serial/reference numbers, voltage, amps, frequency, phase, horsepower, kW, IP rating, refrigerant, pressures/outputs, weight, approval/build/barcode data, country of manufacture, notes) and an optional reference image that can be attached to quotes or part requests. Individual fields can be toggled on/off for inclusion in outgoing emails. You can also add a part from a reference image: the app uses Windows OCR to read the nameplate, extracts the details, and shows them in a review window for editing before saving.
+- **Part Catalogue** — Add, edit, and remove parts from the shared catalogue. Parts carry extra identifiers (manufacturer, equipment type, part/model/serial/reference numbers, voltage, amps, frequency, phase, horsepower, kW, IP rating, refrigerant, pressures/outputs, weight, approval/build/barcode data, country of manufacture, notes) and an optional reference image that can be attached to part requests. Individual fields can be toggled on/off for inclusion in outgoing emails. You can also add a part from a reference image: the app uses Windows OCR to read the nameplate, extracts the details, and shows them in a review window for editing before saving.
+- **Scheduling** — Create recurring or date-specific schedules for customers (weekly, bi-weekly, monthly, yearly, custom intervals, or specific dates), view them in a built-in calendar, and sync them to Google Calendar so alerts appear on mobile devices signed into the same Google account.
 
 ## Adding a New Module
 
@@ -49,24 +50,25 @@ The dashboard will automatically create a tile for it and host its view when cli
 
 Application data is stored in `%APPDATA%\BerryGoodUtils\appdata.json`.
 
-Customer folders are created under `Documents\BerryGoodUtils\Customers\<CustomerName>`, each with a `Quotes` subfolder.
+Customer folders are created under `Documents\BerryGoodUtils\Customers\<CustomerName>`.
 
-Business documents are stored under `Documents\BerryGoodUtils\Business\`, including `Business\Quotes` and `Business\PartRequests`.
+Business documents are stored under `Documents\BerryGoodUtils\Business\`, including `Business\PartRequests`.
 
-## Gmail Setup
+## Gmail & Google Calendar Setup
 
-Email uses Google OAuth and the Gmail API. It never asks for or stores a Gmail password.
+Email uses Google OAuth and the Gmail API. Scheduling sync uses Google Calendar. The app never asks for or stores a Google password.
 
 1. In Google Cloud Console, create or select a project.
-2. Enable the **Gmail API** for that project.
-3. Configure the OAuth consent screen. While its publishing status is **Testing**, add the personal Gmail address under **Test users**.
+2. Enable the **Gmail API** and the **Google Calendar API** for that project.
+3. Configure the OAuth consent screen. Add the `.../auth/gmail.send`, `.../auth/gmail.metadata`, and `.../auth/calendar.events` scopes. While its publishing status is **Testing**, add the personal Gmail address under **Test users**.
 4. Create an OAuth client with application type **Desktop app**.
 5. Download the client JSON, rename it to `gmail-oauth-client.json`, and place it in `%APPDATA%\BerryGoodUtils\gmail-oauth-client.json`.
-6. Generate a quote or part request, choose to email it, and select **Sign in / Change account**. Complete consent in the browser.
+6. From the main dashboard header, select **Sign in to Google**. Complete consent in the browser. The same sign-in is used for Gmail and Google Calendar sync.
+7. Generate a part request and choose to email it, or open the Scheduling module and sync a schedule.
 
-The refresh token is encrypted for the current Windows user under `%APPDATA%\BerryGoodUtils\GmailTokens` and is restored automatically when the app restarts. The OAuth JSON, token data, and personal test address must never be committed. Google OAuth apps configured as External with publishing status Testing can issue refresh tokens that expire after seven days for non-basic scopes such as Gmail; production users should not need to sign in on every launch, but the consent app must be moved out of Testing when it is ready for ongoing use.
+The refresh token is encrypted for the current Windows user under `%APPDATA%\BerryGoodUtils\GoogleTokens` and is restored automatically when the app restarts. The OAuth JSON, token data, and personal test address must never be committed. Adding the Calendar scope means existing users will be prompted to re-consent the first time they sign in after this update. Google OAuth apps configured as External with publishing status Testing can issue refresh tokens that expire after seven days for non-basic scopes such as Gmail/Calendar; production users should not need to sign in on every launch, but the consent app must be moved out of Testing when it is ready for ongoing use.
 
-To change the sending Gmail account, open an email preview, select **Sign out**, then **Sign in / Change account** and authenticate with the replacement account. If the replacement account is used while the OAuth app remains in Testing, add it as a Google Cloud test user first. Replacing the Google Cloud project itself requires signing out, replacing `gmail-oauth-client.json`, and signing in again.
+To change the sending Google account, use the **Sign out** button on the main dashboard header, then **Sign in to Google** and authenticate with the replacement account. If the replacement account is used while the OAuth app remains in Testing, add it as a Google Cloud test user first. Replacing the Google Cloud project itself requires signing out, replacing `gmail-oauth-client.json`, and signing in again.
 
 For a production release, complete the OAuth consent and verification requirements applicable to the selected Gmail scopes. Review Google Cloud publishing rules before distributing the application.
 

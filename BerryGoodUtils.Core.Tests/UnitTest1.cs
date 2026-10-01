@@ -4,6 +4,7 @@ using System.Text.Json;
 using BerryGoodUtils.Core.Documents;
 using BerryGoodUtils.Core.Email;
 using BerryGoodUtils.Core.Ocr;
+using BerryGoodUtils.Core.Scheduling;
 using BerryGoodUtils.Models;
 
 namespace BerryGoodUtils.Core.Tests;
@@ -274,5 +275,139 @@ public class CoreTests
         Assert.Equal("10A", part.Amps);
         Assert.Equal("1", part.Phase);
         Assert.Equal("25 g/h", part.TargetOutput);
+    }
+
+    [Fact]
+    public void RRuleBuilderReturnsNullForNonRecurringSchedules()
+    {
+        var schedule = new CustomerSchedule { RecurrenceType = ScheduleRecurrenceType.None };
+        Assert.Null(RRuleBuilder.Build(schedule));
+    }
+
+    [Fact]
+    public void RRuleBuilderReturnsNullForSpecificDates()
+    {
+        var schedule = new CustomerSchedule { RecurrenceType = ScheduleRecurrenceType.SpecificDates };
+        Assert.Null(RRuleBuilder.Build(schedule));
+    }
+
+    [Theory]
+    [InlineData(ScheduleRecurrenceType.Weekly, "RRULE:FREQ=WEEKLY")]
+    [InlineData(ScheduleRecurrenceType.BiWeekly, "RRULE:FREQ=WEEKLY;INTERVAL=2")]
+    [InlineData(ScheduleRecurrenceType.Monthly, "RRULE:FREQ=MONTHLY")]
+    [InlineData(ScheduleRecurrenceType.Yearly, "RRULE:FREQ=YEARLY")]
+    public void RRuleBuilderGeneratesPresetRules(ScheduleRecurrenceType type, string expected)
+    {
+        var schedule = new CustomerSchedule { RecurrenceType = type };
+        Assert.Equal(expected, RRuleBuilder.Build(schedule));
+    }
+
+    [Theory]
+    [InlineData(CustomIntervalUnit.Days, 3, "RRULE:FREQ=DAILY;INTERVAL=3")]
+    [InlineData(CustomIntervalUnit.Weeks, 2, "RRULE:FREQ=WEEKLY;INTERVAL=2")]
+    [InlineData(CustomIntervalUnit.Months, 6, "RRULE:FREQ=MONTHLY;INTERVAL=6")]
+    [InlineData(CustomIntervalUnit.Years, 5, "RRULE:FREQ=YEARLY;INTERVAL=5")]
+    public void RRuleBuilderGeneratesCustomIntervalRules(CustomIntervalUnit unit, int value, string expected)
+    {
+        var schedule = new CustomerSchedule
+        {
+            RecurrenceType = ScheduleRecurrenceType.CustomInterval,
+            CustomIntervalUnit = unit,
+            CustomIntervalValue = value
+        };
+        Assert.Equal(expected, RRuleBuilder.Build(schedule));
+    }
+
+    [Fact]
+    public void RRuleBuilderIgnoresIntervalOfOne()
+    {
+        var schedule = new CustomerSchedule
+        {
+            RecurrenceType = ScheduleRecurrenceType.CustomInterval,
+            CustomIntervalUnit = CustomIntervalUnit.Days,
+            CustomIntervalValue = 1
+        };
+        Assert.Equal("RRULE:FREQ=DAILY", RRuleBuilder.Build(schedule));
+    }
+
+    [Fact]
+    public void OccurrenceCalculatorExpandsWeeklySchedule()
+    {
+        var schedule = new CustomerSchedule
+        {
+            StartDateTime = new DateTime(2026, 1, 5),
+            RecurrenceType = ScheduleRecurrenceType.Weekly
+        };
+        var occurrences = ScheduleOccurrenceCalculator.GetOccurrences(schedule, new DateTime(2026, 1, 1), new DateTime(2026, 1, 31));
+        Assert.Equal(4, occurrences.Count);
+        Assert.Contains(new DateTime(2026, 1, 5), occurrences);
+        Assert.Contains(new DateTime(2026, 1, 12), occurrences);
+        Assert.Contains(new DateTime(2026, 1, 19), occurrences);
+        Assert.Contains(new DateTime(2026, 1, 26), occurrences);
+    }
+
+    [Fact]
+    public void OccurrenceCalculatorExpandsBiWeeklySchedule()
+    {
+        var schedule = new CustomerSchedule
+        {
+            StartDateTime = new DateTime(2026, 1, 5),
+            RecurrenceType = ScheduleRecurrenceType.BiWeekly
+        };
+        var occurrences = ScheduleOccurrenceCalculator.GetOccurrences(schedule, new DateTime(2026, 1, 1), new DateTime(2026, 2, 28));
+        Assert.Equal(4, occurrences.Count);
+        Assert.Contains(new DateTime(2026, 1, 5), occurrences);
+        Assert.Contains(new DateTime(2026, 1, 19), occurrences);
+        Assert.Contains(new DateTime(2026, 2, 2), occurrences);
+        Assert.Contains(new DateTime(2026, 2, 16), occurrences);
+    }
+
+    [Fact]
+    public void OccurrenceCalculatorReturnsSpecificDatesOnlyInRange()
+    {
+        var schedule = new CustomerSchedule
+        {
+            RecurrenceType = ScheduleRecurrenceType.SpecificDates,
+            SpecificDates =
+            [
+                new DateTime(2026, 1, 5),
+                new DateTime(2026, 2, 15),
+                new DateTime(2026, 6, 1)
+            ]
+        };
+        var occurrences = ScheduleOccurrenceCalculator.GetOccurrences(schedule, new DateTime(2026, 1, 1), new DateTime(2026, 3, 31));
+        Assert.Equal(2, occurrences.Count);
+        Assert.Contains(new DateTime(2026, 1, 5), occurrences);
+        Assert.Contains(new DateTime(2026, 2, 15), occurrences);
+    }
+
+    [Fact]
+    public void OccurrenceCalculatorReturnsSingleOccurrenceForNone()
+    {
+        var schedule = new CustomerSchedule
+        {
+            StartDateTime = new DateTime(2026, 1, 10),
+            RecurrenceType = ScheduleRecurrenceType.None
+        };
+        var occurrences = ScheduleOccurrenceCalculator.GetOccurrences(schedule, new DateTime(2026, 1, 1), new DateTime(2026, 1, 31));
+        Assert.Single(occurrences);
+        Assert.Equal(new DateTime(2026, 1, 10), occurrences[0]);
+    }
+
+    [Fact]
+    public void NextOccurrenceReturnsEarliestFutureSpecificDate()
+    {
+        var schedule = new CustomerSchedule
+        {
+            RecurrenceType = ScheduleRecurrenceType.SpecificDates,
+            SpecificDates =
+            [
+                new DateTime(2026, 1, 1),
+                new DateTime(2026, 1, 15),
+                new DateTime(2026, 1, 10)
+            ]
+        };
+        var next = ScheduleOccurrenceCalculator.GetNextOccurrence(schedule, new DateTime(2026, 1, 9));
+        Assert.Equal(new DateTime(2026, 1, 10), next);
     }
 }

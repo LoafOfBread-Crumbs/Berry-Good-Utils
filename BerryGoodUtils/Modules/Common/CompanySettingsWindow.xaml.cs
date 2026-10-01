@@ -2,7 +2,7 @@ using System.Windows;
 using BerryGoodUtils.Models;
 using BerryGoodUtils.Services;
 
-namespace BerryGoodUtils.Modules.QuoteGenerator;
+namespace BerryGoodUtils.Modules.Common;
 
 public partial class CompanySettingsWindow : Window
 {

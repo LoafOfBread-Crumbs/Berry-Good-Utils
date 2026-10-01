@@ -4,3 +4,4 @@
 *.user
 gmail-oauth-client.json
 **/GmailTokens/
+**/GoogleTokens/

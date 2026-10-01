@@ -8,6 +8,9 @@ using System.Windows.Threading;
 using BerryGoodUtils.ClarkeeMode;
 using BerryGoodUtils.Modules;
 using BerryGoodUtils.Services;
+using BerryGoodUtils.Services.Auth;
+using BerryGoodUtils.Services.Calendar;
+using BerryGoodUtils.Services.Email;
 
 namespace BerryGoodUtils;
 
@@ -32,7 +35,7 @@ public partial class MainWindow : Window
         clarkeeCanvas.SizeChanged += ClarkeeCanvas_SizeChanged;
     }
 
-    private void Window_Loaded(object sender, RoutedEventArgs e)
+    private async void Window_Loaded(object sender, RoutedEventArgs e)
     {
         var workArea = SystemParameters.WorkArea;
 
@@ -50,6 +53,86 @@ public partial class MainWindow : Window
 
         Left = Math.Max(workArea.Left, Math.Min(Left, workArea.Right - ActualWidth));
         Top = Math.Max(workArea.Top, Math.Min(Top, workArea.Bottom - ActualHeight));
+
+        await RefreshGoogleStatusAsync();
+    }
+
+    private async Task RefreshGoogleStatusAsync()
+    {
+        try
+        {
+            var status = await new GoogleCalendarService(ModuleRegistry.GoogleAuth).GetStatusAsync();
+            if (!status.IsConfigured)
+            {
+                txtGoogleStatus.Text = "Google: not configured";
+                btnGoogleSignIn.Visibility = Visibility.Collapsed;
+                btnGoogleSignOut.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            txtGoogleStatus.Text = status.IsConnected ? "Google: signed in" : "Google: not signed in";
+            if (status.IsConnected)
+            {
+                btnGoogleSignIn.Visibility = Visibility.Collapsed;
+                btnGoogleSignOut.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                btnGoogleSignIn.Visibility = Visibility.Visible;
+                btnGoogleSignOut.Visibility = Visibility.Collapsed;
+            }
+        }
+        catch (Exception ex)
+        {
+            txtGoogleStatus.Text = $"Google: {ex.Message}";
+            btnGoogleSignIn.Visibility = Visibility.Visible;
+            btnGoogleSignOut.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private async void GoogleSignIn_Click(object sender, RoutedEventArgs e)
+    {
+        SetGoogleBusy(true);
+        try
+        {
+            var email = await new GmailEmailSender(ModuleRegistry.GoogleAuth).SignInAsync();
+            txtGoogleStatus.Text = $"Google: {email}";
+            btnGoogleSignIn.Visibility = Visibility.Collapsed;
+            btnGoogleSignOut.Visibility = Visibility.Visible;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Google Sign In", MessageBoxButton.OK, MessageBoxImage.Error);
+            await RefreshGoogleStatusAsync();
+        }
+        finally
+        {
+            SetGoogleBusy(false);
+        }
+    }
+
+    private async void GoogleSignOut_Click(object sender, RoutedEventArgs e)
+    {
+        SetGoogleBusy(true);
+        try
+        {
+            await ModuleRegistry.GoogleAuth.RevokeAsync();
+            await RefreshGoogleStatusAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Google Sign Out", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            SetGoogleBusy(false);
+        }
+    }
+
+    private void SetGoogleBusy(bool busy)
+    {
+        btnGoogleSignIn.IsEnabled = !busy;
+        btnGoogleSignOut.IsEnabled = !busy;
     }
 
     private void LoadDashboardTiles()

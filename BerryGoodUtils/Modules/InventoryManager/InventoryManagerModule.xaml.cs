@@ -14,8 +14,8 @@ namespace BerryGoodUtils.Modules.InventoryManager;
 
 public partial class InventoryManagerModule : UserControl, IUtilityModule
 {
-    public string ModuleName => "Inventory Manager";
-    public string Description => "Add, edit, and remove parts from the shared inventory.";
+    public string ModuleName => "Part Catalogue";
+    public string Description => "Add, edit, and remove parts from the shared catalogue.";
     public string Icon => "🗂️";
     public UserControl View => this;
 
