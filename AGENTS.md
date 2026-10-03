@@ -50,7 +50,7 @@ The dashboard will automatically create a tile for it and host its view when cli
 
 Application data is stored in `%APPDATA%\BerryGoodUtils\appdata.json`.
 
-Customer folders are created under `Documents\BerryGoodUtils\Customers\<CustomerName>`.
+Customer folders are created under `Documents\BerryGoodUtils\Customers\<CustomerName>`. Imported and locally selected visit photos are archived under `Customer Files\<yyyy-MM-dd>` inside that customer folder; timestamped post-visit comment snapshots are stored alongside them.
 
 Business documents are stored under `Documents\BerryGoodUtils\Business\`, including `Business\PartRequests`.
 
@@ -59,14 +59,14 @@ Business documents are stored under `Documents\BerryGoodUtils\Business\`, includ
 Email uses Google OAuth and the Gmail API. Scheduling sync uses Google Calendar. The app never asks for or stores a Google password.
 
 1. In Google Cloud Console, create or select a project.
-2. Enable the **Gmail API** and the **Google Calendar API** for that project.
-3. Configure the OAuth consent screen. Add the `.../auth/gmail.send`, `.../auth/gmail.metadata`, and `.../auth/calendar.events` scopes. While its publishing status is **Testing**, add the personal Gmail address under **Test users**.
+2. Enable the **Gmail API**, **Google Calendar API**, and **Google Drive API** for that project.
+3. Configure the OAuth consent screen. Add the `.../auth/gmail.send`, `.../auth/gmail.metadata`, `.../auth/calendar.events`, `.../auth/drive.file`, and `.../auth/drive.readonly` scopes. While its publishing status is **Testing**, add the personal Gmail address under **Test users**.
 4. Create an OAuth client with application type **Desktop app**.
 5. Download the client JSON, rename it to `gmail-oauth-client.json`, and place it in `%APPDATA%\BerryGoodUtils\gmail-oauth-client.json`.
 6. From the main dashboard header, select **Sign in to Google**. Complete consent in the browser. The same sign-in is used for Gmail and Google Calendar sync.
 7. Generate a part request and choose to email it, or open the Scheduling module and sync a schedule.
 
-The refresh token is encrypted for the current Windows user under `%APPDATA%\BerryGoodUtils\GoogleTokens` and is restored automatically when the app restarts. The OAuth JSON, token data, and personal test address must never be committed. Adding the Calendar scope means existing users will be prompted to re-consent the first time they sign in after this update. Google OAuth apps configured as External with publishing status Testing can issue refresh tokens that expire after seven days for non-basic scopes such as Gmail/Calendar; production users should not need to sign in on every launch, but the consent app must be moved out of Testing when it is ready for ongoing use.
+The refresh token is encrypted for the current Windows user under `%APPDATA%\BerryGoodUtils\GoogleTokens` and is restored automatically when the app restarts. The OAuth JSON, token data, and personal test address must never be committed. Adding Calendar or Drive scopes means existing users must sign out and sign in again after the update to grant the new permissions. Google OAuth apps configured as External with publishing status Testing can issue refresh tokens that expire after seven days for non-basic scopes such as Gmail/Calendar; production users should not need to sign in on every launch, but the consent app must be moved out of Testing when it is ready for ongoing use.
 
 To change the sending Google account, use the **Sign out** button on the main dashboard header, then **Sign in to Google** and authenticate with the replacement account. If the replacement account is used while the OAuth app remains in Testing, add it as a Google Cloud test user first. Replacing the Google Cloud project itself requires signing out, replacing `gmail-oauth-client.json`, and signing in again.
 
@@ -78,20 +78,14 @@ For a production release, complete the OAuth consent and verification requiremen
 
 ## Releasing an Update
 
-The app can check for and install updates from GitHub Releases.
+Berry Good Utils is distributed as an x64 MSIX through a permanently private Microsoft Store audience. The Store signs, installs, and updates the application; do not restore the former GitHub EXE self-updater.
 
-1. Update the version in `BerryGoodUtils/BerryGoodUtils.csproj`:
-   ```xml
-   <Version>1.0.1</Version>
-   <AssemblyVersion>1.0.1</AssemblyVersion>
-   <FileVersion>1.0.1</FileVersion>
-   ```
-2. Publish a self-contained EXE:
-   ```powershell
-   dotnet publish BerryGoodUtils/BerryGoodUtils.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
-   ```
-3. Create a GitHub Release with a tag matching the version, e.g. `v1.0.1`.
-4. Attach the published EXE (`BerryGoodUtils.exe`) to the release. The updater looks for an asset with that exact name.
-5. Deployed builds can click **Check for Updates** on the dashboard header; if a newer release tag is found, the app downloads the EXE and restarts with the new version.
+1. Increment `Version`, `AssemblyVersion`, and `FileVersion` in `BerryGoodUtils/BerryGoodUtils.csproj`.
+2. Set the matching four-part `Identity Version` in `BerryGoodUtils.Package/Package.appxmanifest` (for example, app version `1.0.10` uses package version `1.0.10.0`). Store package versions must always increase.
+3. Run the Core tests and Release build.
+4. Build the Store upload package from `BerryGoodUtils.Package/BerryGoodUtils.Package.wapproj` for `Release|x64` with Store upload mode enabled.
+5. Run the Windows App Certification Kit against the package.
+6. Upload the generated `.msixupload` or `.appxupload` file as a new submission for the existing **Berry Good Utils** Partner Center product.
+7. Confirm **Free** and **Private audience** still target only the approved Known User Group before submitting for certification.
 
-The replacement happens from a temporary PowerShell helper script after the current process exits. If the app is installed under a protected folder such as `Program Files`, the helper will need elevation to overwrite the EXE. For first-time deployments, installing to a user-writable location (for example, a folder under `%LOCALAPPDATA%`) avoids this issue.
+The Store package identity is `GitaLoafofBread.BerryGoodUtils`. Never change an existing submission to **Public audience**; Microsoft does not allow a public product to return to private visibility.

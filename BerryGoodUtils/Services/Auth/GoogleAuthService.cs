@@ -1,6 +1,7 @@
 using System.IO;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Calendar.v3;
+using Google.Apis.Drive.v3;
 using Google.Apis.Gmail.v1;
 using Google.Apis.Util.Store;
 using BerryGoodUtils.Services.Email;
@@ -41,7 +42,8 @@ public sealed class GoogleAuthService
         var secrets = GoogleClientSecrets.FromStream(stream).Secrets;
         _credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
             secrets,
-            [GmailService.Scope.GmailSend, GmailService.Scope.GmailMetadata, CalendarService.Scope.CalendarEvents],
+            [GmailService.Scope.GmailSend, GmailService.Scope.GmailMetadata, CalendarService.Scope.CalendarEvents,
+                DriveService.Scope.DriveFile, DriveService.Scope.DriveReadonly],
             ApplicationName,
             cancellationToken,
             _tokenStore);

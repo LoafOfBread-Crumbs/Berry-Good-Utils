@@ -105,11 +105,19 @@
                                                 <Border.Tag>
                                                     <Binding/>
                                                 </Border.Tag>
-                                                <StackPanel>
-                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis"/>
-                                                    <TextBlock Text="{Binding CustomerName}" FontSize="12" Foreground="{StaticResource TextMutedBrush}" TextTrimming="CharacterEllipsis"/>
-                                                    <TextBlock Text="{Binding TimeRange}" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
-                                                </StackPanel>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis"/>
+                                                        <TextBlock Text="{Binding CustomerName}" FontSize="12" Foreground="{StaticResource TextMutedBrush}" TextTrimming="CharacterEllipsis"/>
+                                                        <TextBlock Text="{Binding TimeRange}" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+                                                        <TextBlock Text="{Binding CommentPreview}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" FontStyle="Italic" TextTrimming="CharacterEllipsis"/>
+                                                    </StackPanel>
+                                                    <Button Grid.Column="1" Content="Comments" Style="{StaticResource SecondaryButton}" Click="VisitComments_Click" Tag="{Binding}" Padding="8,4" Margin="8,0,0,0"/>
+                                                </Grid>
                                             </Border>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
@@ -149,8 +157,8 @@
                 <Button x:Name="btnEdit" Content="Edit Selected" Style="{StaticResource SecondaryButton}" Click="EditSchedule_Click" IsEnabled="False" Margin="0,0,8,8"/>
                 <Button x:Name="btnDelete" Content="Delete Selected" Style="{StaticResource DangerButton}" Click="DeleteSchedule_Click" IsEnabled="False" Margin="0,0,8,8"/>
                 <Button x:Name="btnSync" Content="Sync Selected" Style="{StaticResource SecondaryButton}" Click="SyncSelected_Click" IsEnabled="False" Margin="0,0,8,8"/>
-                <Button Content="Sync All to Google" Style="{StaticResource SecondaryButton}" Click="SyncAll_Click" Margin="0,0,8,8"/>
-                <Button Content="Refresh" Style="{StaticResource SecondaryButton}" Click="Refresh_Click" Margin="0,0,0,8"/>
+                <Button Content="Sync All with Google" Style="{StaticResource SecondaryButton}" Click="SyncAll_Click" Margin="0,0,8,8"/>
+                <Button Content="Refresh / Import" Style="{StaticResource SecondaryButton}" Click="Refresh_Click" Margin="0,0,0,8"/>
             </WrapPanel>
         </Border>
     </Grid>

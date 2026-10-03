@@ -117,6 +117,86 @@ public class CoreTests
         Assert.NotNull(data);
         Assert.Equal("Example", data.Company.CompanyName);
         Assert.Equal(1234, data.NextQuoteNumber);
+        Assert.Empty(data.Schedules);
+    }
+
+    [Fact]
+    public void ExistingScheduleJsonDeserializesWithEmptyVisitComments()
+    {
+        const string json = """
+            {"CustomerId":"customer-1","Title":"Service","StartDateTime":"2026-01-05T08:00:00"}
+            """;
+
+        var schedule = JsonSerializer.Deserialize<CustomerSchedule>(json);
+
+        Assert.NotNull(schedule);
+        Assert.Empty(schedule.VisitComments);
+    }
+
+    [Fact]
+    public void VisitPhotosRoundTripWithScheduleData()
+    {
+        var schedule = new CustomerSchedule
+        {
+            VisitComments =
+            [
+                new VisitComment
+                {
+                    OccurrenceDateTime = new DateTime(2026, 10, 3, 9, 0, 0),
+                    Comments = "Completed",
+                    Photos = [new VisitPhoto { FileName = "pool.jpg", DriveFileId = "drive-1", LocalPath = "photos/pool.jpg" }]
+                }
+            ]
+        };
+
+        var roundTrip = JsonSerializer.Deserialize<CustomerSchedule>(JsonSerializer.Serialize(schedule));
+
+        Assert.NotNull(roundTrip);
+        var photo = Assert.Single(Assert.Single(roundTrip.VisitComments).Photos);
+        Assert.Equal("pool.jpg", photo.FileName);
+        Assert.Equal("drive-1", photo.DriveFileId);
+    }
+
+    [Fact]
+    public void CalendarDescriptionRoundTripsMultilineCommentsAndPreservesText()
+    {
+        const string description = "Service details\r\nPhone: 123";
+        var result = CalendarDescriptionFormatter.Build(description, "Cleaned filter\nNeeds a new seal");
+
+        Assert.Contains("Service details\nPhone: 123", result);
+        Assert.Equal("Cleaned filter\nNeeds a new seal", CalendarDescriptionFormatter.ParseComments(result));
+        Assert.Equal("Service details\nPhone: 123", CalendarDescriptionFormatter.RemoveCommentsSection(result));
+    }
+
+    [Fact]
+    public void CalendarDescriptionBuildReplacesExistingCommentsBlock()
+    {
+        var first = CalendarDescriptionFormatter.Build("Appointment", "Old comment");
+        var updated = CalendarDescriptionFormatter.Build(first, "New comment");
+
+        Assert.Equal("New comment", CalendarDescriptionFormatter.ParseComments(updated));
+        Assert.DoesNotContain("Old comment", updated);
+        Assert.Equal(1, updated.Split(CalendarDescriptionFormatter.StartMarker).Length - 1);
+    }
+
+    [Fact]
+    public void CalendarDescriptionHandlesEmptyAndUnmarkedDescriptions()
+    {
+        var result = CalendarDescriptionFormatter.Build(null, null);
+
+        Assert.Equal(string.Empty, CalendarDescriptionFormatter.ParseComments(result));
+        Assert.Equal(string.Empty, CalendarDescriptionFormatter.ParseComments("Ordinary calendar text"));
+        Assert.Equal("Ordinary calendar text", CalendarDescriptionFormatter.RemoveCommentsSection("Ordinary calendar text"));
+    }
+
+    [Fact]
+    public void CalendarConflictResolutionUsesLatestModification()
+    {
+        var local = new DateTime(2026, 1, 2, 10, 0, 0, DateTimeKind.Utc);
+
+        Assert.True(CalendarDescriptionFormatter.ShouldImport(local, local.AddMinutes(1)));
+        Assert.False(CalendarDescriptionFormatter.ShouldImport(local, local.AddMinutes(-1)));
+        Assert.False(CalendarDescriptionFormatter.ShouldImport(local, null));
     }
 
     [Fact]

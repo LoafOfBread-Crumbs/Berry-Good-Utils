@@ -341,29 +341,4 @@ public partial class MainWindow : Window
         }
     }
 
-    private async void Update_Click(object sender, RoutedEventArgs e)
-    {
-        try
-        {
-            var result = await UpdateService.CheckForUpdateAsync();
-
-            if (!string.IsNullOrWhiteSpace(result.ErrorMessage))
-            {
-                MessageBox.Show(result.ErrorMessage, "Update Check Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            if (!result.IsUpdateAvailable)
-            {
-                MessageBox.Show($"You are running the latest version ({result.CurrentVersion}).", "No Updates Available", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-
-            new UpdateWindow(result) { Owner = this }.ShowDialog();
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Could not check for updates: {ex.Message}", "Update Error", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-    }
 }

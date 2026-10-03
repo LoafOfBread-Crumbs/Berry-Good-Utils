@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Schedule" Height="560" Width="520"
+        Title="Schedule" Height="680" Width="560"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
         Background="#f0f4f8">
 
@@ -117,6 +117,35 @@
 
                 <TextBlock Text="Reminder (minutes before)" Style="{StaticResource FieldLabel}"/>
                 <TextBox x:Name="txtReminder" Style="{StaticResource InputBox}" Text="30" Margin="0,0,0,12"/>
+
+                <TextBlock Text="Post-visit comments" FontSize="14" FontWeight="SemiBold" Foreground="#334155" Margin="0,4,0,4"/>
+                <TextBlock Text="Comments are stored separately for each visit and sync with that Google Calendar occurrence."
+                           FontSize="11" Foreground="{StaticResource TextMutedBrush}" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <DatePicker x:Name="dpCommentDate" FontSize="13" Padding="4"/>
+                    <Button Grid.Column="2" Content="Add / Edit Visit" Style="{StaticResource SecondaryButton}" Click="AddVisitComment_Click" Padding="12,5"/>
+                </Grid>
+                <ListBox x:Name="lbVisitComments" MinHeight="50" MaxHeight="140" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Background="White" FontSize="13" Margin="0,0,0,12">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="130"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding OccurrenceDateTime, StringFormat=yyyy-MM-dd hh:mm tt}" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Comments}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="8,0"/>
+                                <Button Grid.Column="2" Content="Open" Style="{StaticResource SecondaryButton}" Click="OpenVisitComment_Click" Tag="{Binding}" Padding="8,3"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </StackPanel>
         </ScrollViewer>
 

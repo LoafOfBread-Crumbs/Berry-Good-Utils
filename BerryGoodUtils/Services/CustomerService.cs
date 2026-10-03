@@ -34,10 +34,72 @@ public static class CustomerService
         return path;
     }
 
+    public static string GetVisitPhotosFolder(Customer customer, DateTime occurrence)
+    {
+        var path = Path.Combine(GetCustomerFolderPath(customer), "Customer Files", occurrence.ToString("yyyy-MM-dd"));
+        Directory.CreateDirectory(path);
+        return path;
+    }
+
+    public static string CopyVisitPhoto(Customer customer, DateTime occurrence, string sourcePath)
+    {
+        var folder = GetVisitPhotosFolder(customer, occurrence);
+        var fileName = MakeSafeFileName(Path.GetFileName(sourcePath));
+        var destination = GetUniqueFilePath(folder, fileName);
+        File.Copy(sourcePath, destination);
+        return destination;
+    }
+
+    public static string SaveDownloadedVisitPhoto(Customer customer, DateTime occurrence, string fileName, Stream content)
+    {
+        var folder = GetVisitPhotosFolder(customer, occurrence);
+        var destination = GetUniqueFilePath(folder, MakeSafeFileName(fileName));
+        using var output = File.Create(destination);
+        content.CopyTo(output);
+        return destination;
+    }
+
+    public static string SaveVisitCommentsSnapshot(Customer customer, DateTime occurrence, string comments)
+    {
+        var folder = GetVisitPhotosFolder(customer, occurrence);
+        var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss-fff");
+        var path = Path.Combine(folder, $"Post-Visit Comments {timestamp}.txt");
+        File.WriteAllText(path, comments ?? string.Empty);
+        return path;
+    }
+
+    public static void OpenVisitPhotosFolder(Customer customer, DateTime occurrence)
+    {
+        var folder = GetVisitPhotosFolder(customer, occurrence);
+        Process.Start(new ProcessStartInfo(folder) { UseShellExecute = true });
+    }
+
     public static void OpenRootFolder()
     {
         var folder = GetRootFolder();
         Process.Start(new ProcessStartInfo(folder) { UseShellExecute = true });
+    }
+
+    private static string GetUniqueFilePath(string folder, string fileName)
+    {
+        var path = Path.Combine(folder, fileName);
+        if (!File.Exists(path))
+            return path;
+
+        var stem = Path.GetFileNameWithoutExtension(fileName);
+        var extension = Path.GetExtension(fileName);
+        for (var number = 2; ; number++)
+        {
+            path = Path.Combine(folder, $"{stem} ({number}){extension}");
+            if (!File.Exists(path))
+                return path;
+        }
+    }
+
+    private static string MakeSafeFileName(string name)
+    {
+        var safe = string.Join("_", name.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries)).Trim();
+        return string.IsNullOrWhiteSpace(safe) ? "Photo" : safe;
     }
 
     private static string MakeSafeFolderName(string name)

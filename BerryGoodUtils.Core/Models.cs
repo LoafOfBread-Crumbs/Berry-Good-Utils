@@ -51,8 +51,29 @@ public class CustomerSchedule
     public bool IsSynced { get; set; }
     public DateTime? LastSyncedAt { get; set; }
     public string SyncError { get; set; } = string.Empty;
+    public List<VisitComment> VisitComments { get; set; } = [];
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime UpdatedAt { get; set; } = DateTime.Now;
+}
+
+public class VisitComment
+{
+    public DateTime OccurrenceDateTime { get; set; }
+    public string Comments { get; set; } = string.Empty;
+    public DateTime UpdatedAt { get; set; } = DateTime.Now;
+    public string GoogleCalendarEventId { get; set; } = string.Empty;
+    public DateTime? GoogleUpdatedAt { get; set; }
+    public List<VisitPhoto> Photos { get; set; } = [];
+}
+
+public class VisitPhoto
+{
+    public string FileName { get; set; } = string.Empty;
+    public string LocalPath { get; set; } = string.Empty;
+    public string DriveFileId { get; set; } = string.Empty;
+    public string CalendarFileUrl { get; set; } = string.Empty;
+    public string MimeType { get; set; } = string.Empty;
+    public DateTime AddedAt { get; set; } = DateTime.Now;
 }
 
 public class CompanyInfo

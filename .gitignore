@@ -1,5 +1,7 @@
 **/bin/
 **/obj/
+**/AppPackages/
+**/BundleArtifacts/
 .vs/
 *.user
 gmail-oauth-client.json

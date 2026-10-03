@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="Google.Apis.Calendar.v3" Version="1.72.0.3953" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.72.0.3938" />
     <PackageReference Include="Google.Apis.Gmail.v1" Version="1.70.0.3833" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3537.50" />
     <PackageReference Include="MimeKit" Version="4.15.1" />
@@ -27,6 +28,10 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <Platforms>AnyCPU;x64</Platforms>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
     <RootNamespace>BerryGoodUtils</RootNamespace>
     <AssemblyName>BerryGoodUtils</AssemblyName>
     <Version>1.0.9</Version>

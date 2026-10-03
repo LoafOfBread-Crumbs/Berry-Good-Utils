@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
+using BerryGoodUtils.Core.Scheduling;
 using BerryGoodUtils.Models;
 
 namespace BerryGoodUtils.Modules.Scheduling;
@@ -11,6 +12,7 @@ public partial class SchedulingEditWindow : Window
     public CustomerSchedule Schedule { get; }
     private readonly ObservableCollection<Customer> _customers;
     private ObservableCollection<DateTime> _specificDates;
+    private readonly ObservableCollection<VisitComment> _visitComments;
 
     public SchedulingEditWindow(CustomerSchedule schedule, ObservableCollection<Customer> customers)
     {
@@ -18,6 +20,25 @@ public partial class SchedulingEditWindow : Window
         Schedule = schedule;
         _customers = customers;
         _specificDates = new ObservableCollection<DateTime>(schedule.SpecificDates.OrderBy(d => d.Date));
+        _visitComments = new ObservableCollection<VisitComment>(schedule.VisitComments
+            .OrderBy(c => c.OccurrenceDateTime)
+            .Select(c => new VisitComment
+            {
+                OccurrenceDateTime = c.OccurrenceDateTime,
+                Comments = c.Comments,
+                UpdatedAt = c.UpdatedAt,
+                GoogleCalendarEventId = c.GoogleCalendarEventId,
+                GoogleUpdatedAt = c.GoogleUpdatedAt,
+                Photos = c.Photos.Select(photo => new VisitPhoto
+                {
+                    FileName = photo.FileName,
+                    LocalPath = photo.LocalPath,
+                    DriveFileId = photo.DriveFileId,
+                    CalendarFileUrl = photo.CalendarFileUrl,
+                    MimeType = photo.MimeType,
+                    AddedAt = photo.AddedAt
+                }).ToList()
+            }));
 
         tbTitle.Text = string.IsNullOrWhiteSpace(schedule.Title) ? "New Schedule" : "Edit Schedule";
 
@@ -57,6 +78,8 @@ public partial class SchedulingEditWindow : Window
 
         lbSpecificDates.ItemsSource = _specificDates;
         txtReminder.Text = schedule.ReminderMinutesBefore.ToString();
+        dpCommentDate.SelectedDate = schedule.StartDateTime.Date;
+        lbVisitComments.ItemsSource = _visitComments;
 
         UpdatePanels();
     }
@@ -91,6 +114,55 @@ public partial class SchedulingEditWindow : Window
             return;
 
         _specificDates.Remove(date.Date);
+    }
+
+    private void AddVisitComment_Click(object sender, RoutedEventArgs e)
+    {
+        if (dpCommentDate.SelectedDate is not DateTime date)
+        {
+            MessageBox.Show("Please select a visit date.", "Missing Date", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var occurrence = date.Date + Schedule.StartDateTime.TimeOfDay;
+        if (!ScheduleOccurrenceCalculator.GetOccurrences(Schedule, date.Date, date.Date).Any())
+        {
+            MessageBox.Show("That date is not an occurrence of this schedule. Save schedule changes first if you changed its recurrence.", "Not a Visit Date", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var comment = _visitComments.FirstOrDefault(c => Math.Abs((c.OccurrenceDateTime - occurrence).TotalMinutes) < 1);
+        OpenVisitComment(comment, occurrence);
+    }
+
+    private void OpenVisitComment_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: VisitComment comment })
+            OpenVisitComment(comment, comment.OccurrenceDateTime);
+    }
+
+    private void OpenVisitComment(VisitComment? comment, DateTime occurrence)
+    {
+        var customer = cmbCustomer.SelectedItem as Customer ?? _customers.FirstOrDefault(c => c.Id == Schedule.CustomerId);
+        var window = new VisitCommentsWindow(Schedule, customer, occurrence, comment?.Comments ?? string.Empty, comment?.Photos) { Owner = this };
+        if (window.ShowDialog() != true)
+            return;
+
+        if (comment == null)
+        {
+            comment = new VisitComment { OccurrenceDateTime = occurrence };
+            _visitComments.Add(comment);
+        }
+        comment.Comments = window.ResultComments;
+        comment.Photos = window.ResultPhotos;
+        comment.UpdatedAt = DateTime.Now;
+        RefreshVisitComments();
+    }
+
+    private void RefreshVisitComments()
+    {
+        lbVisitComments.ItemsSource = null;
+        lbVisitComments.ItemsSource = _visitComments.OrderBy(c => c.OccurrenceDateTime).ToList();
     }
 
     private void Save_Click(object sender, RoutedEventArgs e)
@@ -156,6 +228,7 @@ public partial class SchedulingEditWindow : Window
         Schedule.EndDateTime = endDateTime;
         Schedule.RecurrenceType = recurrenceType;
         Schedule.ReminderMinutesBefore = reminderMinutes;
+        Schedule.VisitComments = _visitComments.OrderBy(c => c.OccurrenceDateTime).ToList();
 
         if (recurrenceType == ScheduleRecurrenceType.CustomInterval)
         {

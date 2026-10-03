@@ -224,7 +224,7 @@ public partial class SchedulingModule : UserControl, IUtilityModule
         var schedules = _appData.Schedules
             .Where(s => ScheduleOccurrenceCalculator.GetOccurrences(s, _selectedDate, _selectedDate).Any())
             .OrderBy(s => s.StartDateTime.TimeOfDay)
-            .Select(s => ToListItem(s))
+            .Select(s => ToListItem(s, _selectedDate))
             .ToList();
 
         icSelectedDateSchedules.ItemsSource = schedules;
@@ -253,14 +253,17 @@ public partial class SchedulingModule : UserControl, IUtilityModule
         if (start.TimeOfDay == end.TimeOfDay)
             timeRange = start.ToString("hh:mm tt");
 
+        var occurrence = (nextDate ?? schedule.StartDateTime).Date + schedule.StartDateTime.TimeOfDay;
+        var comment = schedule.VisitComments.FirstOrDefault(c => Math.Abs((c.OccurrenceDateTime - occurrence).TotalMinutes) < 1);
         return new ScheduleListItem
         {
             Schedule = schedule,
             Title = schedule.Title,
             CustomerName = customer?.Name ?? "Unknown customer",
             TimeRange = timeRange,
-            NextDate = nextDate ?? schedule.StartDateTime.Date,
-            RecurrenceLabel = GetRecurrenceLabel(schedule)
+            NextDate = occurrence,
+            RecurrenceLabel = GetRecurrenceLabel(schedule),
+            CommentPreview = string.IsNullOrWhiteSpace(comment?.Comments) ? "Add post-visit comments" : comment.Comments
         };
     }
 
@@ -286,6 +289,39 @@ public partial class SchedulingModule : UserControl, IUtilityModule
         _selectedScheduleId = item.Schedule.Id;
         dgUpcoming.SelectedItem = item;
         UpdateActionStates();
+        if (e.ClickCount == 2)
+            OpenVisitComments(item);
+    }
+
+    private void VisitComments_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: ScheduleListItem item })
+            OpenVisitComments(item);
+        e.Handled = true;
+    }
+
+    private void OpenVisitComments(ScheduleListItem item)
+    {
+        var customer = _appData.Customers.FirstOrDefault(c => c.Id == item.Schedule.CustomerId);
+        var comment = item.Schedule.VisitComments.FirstOrDefault(c => Math.Abs((c.OccurrenceDateTime - item.NextDate).TotalMinutes) < 1);
+        var window = new VisitCommentsWindow(item.Schedule, customer, item.NextDate, comment?.Comments ?? string.Empty, comment?.Photos)
+        {
+            Owner = Window.GetWindow(this)
+        };
+        if (window.ShowDialog() != true)
+            return;
+
+        if (comment == null)
+        {
+            comment = new VisitComment { OccurrenceDateTime = item.NextDate };
+            item.Schedule.VisitComments.Add(comment);
+        }
+        comment.Comments = window.ResultComments;
+        comment.Photos = window.ResultPhotos;
+        comment.UpdatedAt = DateTime.Now;
+        item.Schedule.UpdatedAt = DateTime.Now;
+        DataService.SaveAppData(_appData);
+        RefreshData();
     }
 
     private void DgUpcoming_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -360,18 +396,79 @@ public partial class SchedulingModule : UserControl, IUtilityModule
         SyncSchedule(schedule);
     }
 
-    private void SyncAll_Click(object sender, RoutedEventArgs e)
+    private async void SyncAll_Click(object sender, RoutedEventArgs e)
     {
-        foreach (var schedule in _appData.Schedules.ToList())
+        SetBusy(true);
+        try
         {
-            SyncSchedule(schedule);
+            var imported = 0;
+            var uploaded = 0;
+            var failures = new List<string>();
+            foreach (var schedule in _appData.Schedules.ToList())
+            {
+                var customer = _appData.Customers.FirstOrDefault(c => c.Id == schedule.CustomerId);
+                if (customer == null)
+                {
+                    failures.Add($"{schedule.Title}: customer no longer exists");
+                    continue;
+                }
+                var result = await _calendarService.SyncScheduleAsync(schedule, customer);
+                imported += result.ImportedComments;
+                uploaded += result.UploadedComments;
+                if (!result.Success)
+                    failures.Add($"{schedule.Title}: {result.Message}");
+            }
+            DataService.SaveAppData(_appData);
+            RefreshData();
+            var message = $"Imported {imported} and uploaded {uploaded} post-visit comment/photo item(s).";
+            if (failures.Count > 0)
+                message += $"\n\n{failures.Count} schedule(s) failed:\n{string.Join("\n", failures)}";
+            MessageBox.Show(message, failures.Count == 0 ? "Sync Complete" : "Sync Completed with Warnings", MessageBoxButton.OK,
+                failures.Count == 0 ? MessageBoxImage.Information : MessageBoxImage.Warning);
         }
-        RefreshData();
+        finally
+        {
+            SetBusy(false);
+        }
     }
 
-    private void Refresh_Click(object sender, RoutedEventArgs e)
+    private async void Refresh_Click(object sender, RoutedEventArgs e)
     {
         RefreshData();
+        var status = await _calendarService.GetStatusAsync();
+        if (!status.IsConnected)
+            return;
+
+        SetBusy(true);
+        try
+        {
+            var imported = 0;
+            var failures = 0;
+            foreach (var schedule in _appData.Schedules.Where(s => s.IsSynced).ToList())
+            {
+                var customer = _appData.Customers.FirstOrDefault(c => c.Id == schedule.CustomerId);
+                if (customer == null)
+                {
+                    failures++;
+                    continue;
+                }
+                var result = await _calendarService.ImportScheduleCommentsAsync(schedule, customer);
+                imported += result.ImportedComments;
+                if (!result.Success)
+                    failures++;
+            }
+            DataService.SaveAppData(_appData);
+            RefreshData();
+            var message = $"Imported {imported} post-visit comment/photo item(s) from Google Calendar.";
+            if (failures > 0)
+                message += $" {failures} schedule(s) could not be refreshed.";
+            MessageBox.Show(message, "Calendar Refresh", MessageBoxButton.OK,
+                failures == 0 ? MessageBoxImage.Information : MessageBoxImage.Warning);
+        }
+        finally
+        {
+            SetBusy(false);
+        }
     }
 
     private async void SyncSchedule(CustomerSchedule schedule)
@@ -442,4 +539,5 @@ public sealed class ScheduleListItem
     public string TimeRange { get; set; } = string.Empty;
     public DateTime NextDate { get; set; }
     public string RecurrenceLabel { get; set; } = string.Empty;
+    public string CommentPreview { get; set; } = string.Empty;
 }
